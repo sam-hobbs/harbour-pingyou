@@ -37,10 +37,10 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Connection>
 #include <QDebug>
 
-AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : mAcc(acc) {
-    //Q_UNUSED(acc);
-    Q_UNUSED(parent);
-}
+//AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : mAcc(acc) {
+//    //Q_UNUSED(acc);
+//    Q_UNUSED(parent);
+//}
 
 
 // ==========================================================
@@ -74,78 +74,90 @@ int AccountsModel::rowCount(const QModelIndex &parent) const {
 
 QVariant AccountsModel::data(const QModelIndex &index, int role) const {
 
-    AccountElement * fobj = myList.at(index.row());
+    qDebug() << "role is: " << role;
 
-    if (role == ColumnValid) {
-//        //return QVariant::fromValue(fobj->mAcc->isValid() ? QLatin1String("true") : QLatin1String("false"));
-
-//        bool valid = fobj->mAcc->isValid();
-//        //return QVariant::fromValue( valid ? QLatin1String("true") : QLatin1String("false"));
-
-//        if (valid) {
-//            return QVariant("true");
-//            //return QVariant::fromValue(QLatin1String("true"));
-//        }
-//        else {
-//            //return QVariant::fromValue(QLatin1String("false"));
-//            return QVariant("false");
-//        }
-
-        return QVariant::fromValue(fobj->mAcc->isValid() ? QVariant("true") : QVariant("false"));
+    if (role == AccountRole) {
+        Tp::Account * account = myList.at(index.row()).data();
+        // need to use QVariant::fromValue to create a QVariant from a pointer https://stackoverflow.com/questions/34240236/qvariantqvariantvoid-is-private
+        return QVariant::fromValue(account);
     }
-    else if (role == ColumnEnabled) {
-        //return QVariant::fromValue(fobj->mAcc->isEnabled() ? "true" : "false");
-        return QVariant::fromValue(fobj->mAcc->isEnabled() ? QVariant("true") : QVariant("false"));
-    }
-    else if (role == ColumnConnectionManager)
-        return QVariant::fromValue(fobj->mAcc->cmName());
-    else if (role == ColumnProtocol)
-        return QVariant::fromValue(fobj->mAcc->protocolName());
-    else if (role == ColumnDisplayName)
-        return QVariant::fromValue(fobj->mAcc->displayName());
-    else if (role == ColumnNickname)
-        return QVariant::fromValue(fobj->mAcc->nickname());
-    else if (role == ColumnConnectsAutomatically) {
-        //return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? "true" : "false");
-        return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? QVariant("true") : QVariant("false"));
-    }
-    else if (role == ColumnChangingPresence) {
-        //return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? "true" : "false");
-        return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? QVariant("true") : QVariant("false"));
-    }
-    else if (role == ColumnAutomaticPresence)
-        return QVariant::fromValue(fobj->mAcc->automaticPresence().status());
-    else if (role == ColumnCurrentPresence)
-        return QVariant::fromValue(fobj->mAcc->currentPresence().status());
-    else if (role == ColumnRequestedPresence)
-        return QVariant::fromValue(fobj->mAcc->requestedPresence().status());
-    else if (role == ColumnConnectionStatus) {
-        //return QVariant::fromValue(fobj->mAcc->connectionStatus());
-        return QVariant::fromValue(QVariant(fobj->mAcc->connectionStatus()));
-    }
-    else if (role == ColumnConnection)
-        return QVariant::fromValue(fobj->mAcc->connection().isNull() ? "" : fobj->mAcc->connection()->objectPath());
-
     return QVariant();
+
+
+//    AccountElement * fobj = myList.at(index.row());
+
+//    if (role == ColumnValid) {
+////        //return QVariant::fromValue(fobj->mAcc->isValid() ? QLatin1String("true") : QLatin1String("false"));
+
+////        bool valid = fobj->mAcc->isValid();
+////        //return QVariant::fromValue( valid ? QLatin1String("true") : QLatin1String("false"));
+
+////        if (valid) {
+////            return QVariant("true");
+////            //return QVariant::fromValue(QLatin1String("true"));
+////        }
+////        else {
+////            //return QVariant::fromValue(QLatin1String("false"));
+////            return QVariant("false");
+////        }
+
+//        return QVariant::fromValue(fobj->mAcc->isValid() ? QVariant("true") : QVariant("false"));
+//    }
+//    else if (role == ColumnEnabled) {
+//        //return QVariant::fromValue(fobj->mAcc->isEnabled() ? "true" : "false");
+//        return QVariant::fromValue(fobj->mAcc->isEnabled() ? QVariant("true") : QVariant("false"));
+//    }
+//    else if (role == ColumnConnectionManager)
+//        return QVariant::fromValue(fobj->mAcc->cmName());
+//    else if (role == ColumnProtocol)
+//        return QVariant::fromValue(fobj->mAcc->protocolName());
+//    else if (role == ColumnDisplayName)
+//        return QVariant::fromValue(fobj->mAcc->displayName());
+//    else if (role == ColumnNickname)
+//        return QVariant::fromValue(fobj->mAcc->nickname());
+//    else if (role == ColumnConnectsAutomatically) {
+//        //return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? "true" : "false");
+//        return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? QVariant("true") : QVariant("false"));
+//    }
+//    else if (role == ColumnChangingPresence) {
+//        //return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? "true" : "false");
+//        return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? QVariant("true") : QVariant("false"));
+//    }
+//    else if (role == ColumnAutomaticPresence)
+//        return QVariant::fromValue(fobj->mAcc->automaticPresence().status());
+//    else if (role == ColumnCurrentPresence)
+//        return QVariant::fromValue(fobj->mAcc->currentPresence().status());
+//    else if (role == ColumnRequestedPresence)
+//        return QVariant::fromValue(fobj->mAcc->requestedPresence().status());
+//    else if (role == ColumnConnectionStatus) {
+//        //return QVariant::fromValue(fobj->mAcc->connectionStatus());
+//        return QVariant::fromValue(QVariant(fobj->mAcc->connectionStatus()));
+//    }
+//    else if (role == ColumnConnection)
+//        return QVariant::fromValue(fobj->mAcc->connection().isNull() ? "" : fobj->mAcc->connection()->objectPath());
+
+//    return QVariant();
 }
 
 
 QHash<int, QByteArray> AccountsModel::roleNames() const {
     QHash<int, QByteArray> roles;
 
-    roles[ColumnValid] = "valid";
-    roles[ColumnEnabled] = "enabled";
-    roles[ColumnConnectionManager] = "connection_manager";
-    roles[ColumnProtocol] = "protocol";
-    roles[ColumnDisplayName] = "display_name";
-    roles[ColumnNickname] = "nickname";
-    roles[ColumnConnectsAutomatically] = "connects_automatically";
-    roles[ColumnChangingPresence] = "changing_presence";
-    roles[ColumnAutomaticPresence] = "automatic_presence";
-    roles[ColumnCurrentPresence] = "current_presence";
-    roles[ColumnRequestedPresence] = "requested_presence";
-    roles[ColumnConnectionStatus] = "connection_status";
-    roles[ColumnConnection] = "connection";
+    roles[AccountRole] = "account";
+
+//    roles[ColumnValid] = "valid";
+//    roles[ColumnEnabled] = "enabled";
+//    roles[ColumnConnectionManager] = "connection_manager";
+//    roles[ColumnProtocol] = "protocol";
+//    roles[ColumnDisplayName] = "display_name";
+//    roles[ColumnNickname] = "nickname";
+//    roles[ColumnConnectsAutomatically] = "connects_automatically";
+//    roles[ColumnChangingPresence] = "changing_presence";
+//    roles[ColumnAutomaticPresence] = "automatic_presence";
+//    roles[ColumnCurrentPresence] = "current_presence";
+//    roles[ColumnRequestedPresence] = "requested_presence";
+//    roles[ColumnConnectionStatus] = "connection_status";
+//    roles[ColumnConnection] = "connection";
 
     return roles;
 }
@@ -174,7 +186,10 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
 
 void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
     qDebug() << "addAccountElement called, adding account with display name " << acc->displayName();
+
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    myList.append(new AccountElement(acc));
+
+    //myList.append(new AccountElement(acc));
+    myList.append(acc);
     endInsertRows();
 }

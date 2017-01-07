@@ -41,79 +41,94 @@ BackgroundItem {
             DetailItem {
                 id: validDetail
                 label: "Valid"
-                value: valid ? "true" : "false"
+                //value: valid ? "true" : "false"
+                value: account.valid ? "true" : "false"
             }
 
             DetailItem {
                 id: enabledDetail
                 label: "Enabled"
-                value: enabled ? "true" : "false"
+                //value: enabled ? "true" : "false"
+                value: account.enabled ? "true" : "false"
             }
 
             DetailItem {
                 id: connectionManagerDetail
                 label: "Connection Manager"
-                value: connection_manager
+                //value: connection_manager
+                value: account.cmName
             }
 
             DetailItem {
                 id: protocolDetail
                 label: "Protocol Name"
-                value: protocol
+                //value: protocol
+                value: account.protocolName
             }
+
+            // http://www.qtcentre.org/threads/48479-QAbstractListModel-does-not-update-QML-ListView
 
             DetailItem {
                 id: displayDetail
                 label: "Display Name"
-                value: display_name
+                //value: display_name
+                value: account.displayName
             }
 
             DetailItem {
                 id: nicknameDetail
                 label: "Nickname"
-                value: nickname
+                //value: nickname
+                value: account.nickname
             }
 
             DetailItem {
                 id: connectsAutomaticallyDetail
                 label: "Connects Automatically"
-                value: connects_automatically ? "true" : "false"
+                //value: connects_automatically ? "true" : "false"
+                value: account.connectsAutomatically ? "true" : "false"
             }
 
             DetailItem {
                 id: changingPresenceDetail
                 label: "Changing Presence"
-                value: changing_presence ? "true" : "false"
+                //value: changing_presence ? "true" : "false"
+                value: account.changingPresence ? "true" : "false"
             }
 
             DetailItem {
                 id: automaticPresenceDetail
                 label: "Automatic Presence"
-                value: automatic_presence
+                //value: automatic_presence
+                value: account.automaticPresence
             }
 
             DetailItem {
                 id: currentPresenceDetail
                 label: "Current Presence"
-                value:  current_presence
+                //value:  current_presence
+                value: account.automaticPresence
             }
 
             DetailItem {
                 id: requestedPresenceDetail
                 label: "Requested Presence"
-                value: requested_presence
+                //value: requested_presence
+                value: account.requestedPresence
             }
 
             DetailItem {
                 id: connectionStatusDetail
                 label: "Connection Status"
-                value: connection_status
+                //value: connection_status
+                value: account.connectionStatus
             }
 
             DetailItem {
                 id: connectionDetail
                 label: "Connection Path"
-                value: connection
+                //value: connection
+                value: account.connection.objectpath
             }
 
         }

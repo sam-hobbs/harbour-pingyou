@@ -9,13 +9,15 @@ Page {
 
     SilicaListView {
         id: listView
-        model: accountsModel
         anchors.fill: parent
         width: parent.width
         header: PageHeader {
             title: "Accounts"
         }
-        delegate: AccountEntry { }
+
+        model: accountsModel
+        delegate: AccountEntry {}
+
         VerticalScrollDecorator {}
 
     }

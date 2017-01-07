@@ -47,6 +47,16 @@ int main(int argc, char *argv[])
     // create AccountsModel item that will be exposed to QML
     AccountsModel *accountsModel = new AccountsModel();
 
+    // register types with qml engine
+    qmlRegisterType<Tp::Account>();
+    //qmlRegisterType<Tp::Account>("harbour.pingyou",1,0,"Account"); // gives error "no matching function for call to Tp::Account::Account()" because account object has no default constructor (required for qml to initialise object)
+    //qmlRegisterExtendedType<Tp::Account>();
+    //qRegisterMetaType<Tp::Account>("Tp::Account");
+
+    qmlRegisterType<Tp::Connection>();
+    //qmlRegisterType<Tp::Presence>(); // gives error "staticMetaObject is not a member of Tp::Presence" because Q_OBJECT macro is not defined in the class
+    //qmlRegisterType<Tp::ConnectionStatus>(); // gives error "staticMetaObject is not a member of Tp::ConnectionStatus" because Q_OBJECT macro is not defined in the class
+
     // expose the accountsModel data model to qml https://doc.qt.io/qt-4.8/qdeclarativemodels.html
     view->rootContext()->setContextProperty("accountsModel", accountsModel);
 

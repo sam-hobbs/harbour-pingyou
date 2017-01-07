@@ -43,12 +43,12 @@ class PendingOperation;
 
 
 
-class AccountElement
-{
-public:
-    AccountElement (Tp::AccountPtr acc, QObject *parent = 0);
-    Tp::AccountPtr mAcc; // needs to be public so that accounts model can access the data
-};
+//class AccountElement
+//{
+//public:
+//    AccountElement (Tp::AccountPtr acc, QObject *parent = 0);
+//    Tp::AccountPtr mAcc; // needs to be public so that accounts model can access the data
+//};
 
 
 
@@ -69,19 +69,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
     enum Columns {
-        ColumnValid = Qt::UserRole + 1,
-        ColumnEnabled,
-        ColumnConnectionManager,
-        ColumnProtocol,
-        ColumnDisplayName,
-        ColumnNickname,
-        ColumnConnectsAutomatically,
-        ColumnChangingPresence,
-        ColumnAutomaticPresence,
-        ColumnCurrentPresence,
-        ColumnRequestedPresence,
-        ColumnConnectionStatus,
-        ColumnConnection,
+        AccountRole = Qt::UserRole + 1,
     };
 
     Q_ENUMS(Columns)
@@ -97,7 +85,8 @@ private Q_SLOTS:
 
 private:
     Tp::AccountManagerPtr mAM;
-    QList<AccountElement *> myList; // could make this a QList of AccountPtr's?
+    //QList<AccountElement *> myList; // could make this a QList of AccountPtr's?
+    QList<Tp::AccountPtr> myList;
 };
 
 #endif
