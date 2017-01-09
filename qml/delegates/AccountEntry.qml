@@ -31,123 +31,103 @@ BackgroundItem {
         id: itemId
         width: parent.width
 
-        contentHeight: column.visible ? button.height + column.height : button.height
+        contentHeight: expanding.height
 
-        Button {
-            id: button
-            anchors.left: parent.left
-            anchors.right: parent.right
+        ExpandingSection {
+            id: expanding
+            title: (account.valid && account.enabled) ? account.displayName + " (enabled)" : account.displayName + " (disabled)"
+            expanded: (account.enabled && account.enabled)
+            content.sourceComponent:
 
-            text: (account.valid && account.enabled) ? account.displayName + " (enabled)" : account.displayName + " (disabled)"
-            onClicked: {column.visible = !column.visible}
+            Column {
+                id: column
 
-        }
-
-        Column {
-            id: column
-            visible: (account.enabled && account.enabled)
-
-            width: parent.width
-            anchors.top: button.bottom
-            anchors.leftMargin: Theme.paddingLarge
-            anchors.rightMargin: Theme.paddingLarge
-
-//            Label {
-//                id: title
-//                width: parent.width
-//                text: account.displayName
-//                font.pixelSize: Theme.fontSizeMedium
-//                horizontalAlignment: Text.AlignHCenter
-//            }
-
-            Image {
-                id: avatarImage
                 width: parent.width
-                asynchronous: true // don't block the UI while the image is loaded
-                fillMode: Image.PreserveAspectFit
-                source: account.avatarPath
+                anchors.leftMargin: Theme.paddingLarge
+                anchors.rightMargin: Theme.paddingLarge
+
+                Image {
+                    id: avatarImage
+                    width: parent.width
+                    asynchronous: true // don't block the UI while the image is loaded
+                    fillMode: Image.PreserveAspectFit
+                    source: account.avatarPath
+
+                }
+
+                DetailItem {
+                    id: validDetail
+                    label: "Valid"
+                    value: account.valid ? "true" : "false"
+                }
+
+                DetailItem {
+                    id: enabledDetail
+                    label: "Enabled"
+                    value: account.enabled ? "true" : "false"
+                }
+
+                DetailItem {
+                    id: connectionManagerDetail
+                    label: "Connection Manager"
+                    value: account.cmName
+                }
+
+                DetailItem {
+                    id: protocolDetail
+                    label: "Protocol Name"
+                    value: account.protocolName
+                }
+
+                DetailItem {
+                    id: nicknameDetail
+                    label: "Nickname"
+                    value: account.nickname
+                }
+
+                DetailItem {
+                    id: connectsAutomaticallyDetail
+                    label: "Connects Automatically"
+                    value: account.connectsAutomatically ? "true" : "false"
+                }
+
+                DetailItem {
+                    id: changingPresenceDetail
+                    label: "Changing Presence"
+                    value: account.changingPresence ? "true" : "false"
+                }
+
+                DetailItem {
+                    id: automaticPresenceDetail
+                    label: "Automatic Presence"
+                    value: account.automaticPresence
+                }
+
+                DetailItem {
+                    id: currentPresenceDetail
+                    label: "Current Presence"
+                    value: account.automaticPresence
+                }
+
+                DetailItem {
+                    id: requestedPresenceDetail
+                    label: "Requested Presence"
+                    value: account.requestedPresence
+                }
+
+                DetailItem {
+                    id: connectionStatusDetail
+                    label: "Connection Status"
+                    value: account.connectionStatus
+                }
+
+                DetailItem {
+                    id: connectionDetail
+                    label: "Connection Path"
+                    value: account.connectionPath
+                }
 
             }
-
-//            TextSwitch {
-//                id: enabledSwitch
-//                text: "Enabled"
-//                automaticCheck: false
-//                checked: account.enabled
-//            }
-
-            DetailItem {
-                id: validDetail
-                label: "Valid"
-                value: account.valid ? "true" : "false"
-            }
-
-            DetailItem {
-                id: enabledDetail
-                label: "Enabled"
-                value: account.enabled ? "true" : "false"
-            }
-
-            DetailItem {
-                id: connectionManagerDetail
-                label: "Connection Manager"
-                value: account.cmName
-            }
-
-            DetailItem {
-                id: protocolDetail
-                label: "Protocol Name"
-                value: account.protocolName
-            }
-
-            DetailItem {
-                id: nicknameDetail
-                label: "Nickname"
-                value: account.nickname
-            }
-
-            DetailItem {
-                id: connectsAutomaticallyDetail
-                label: "Connects Automatically"
-                value: account.connectsAutomatically ? "true" : "false"
-            }
-
-            DetailItem {
-                id: changingPresenceDetail
-                label: "Changing Presence"
-                value: account.changingPresence ? "true" : "false"
-            }
-
-            DetailItem {
-                id: automaticPresenceDetail
-                label: "Automatic Presence"
-                value: account.automaticPresence
-            }
-
-            DetailItem {
-                id: currentPresenceDetail
-                label: "Current Presence"
-                value: account.automaticPresence
-            }
-
-            DetailItem {
-                id: requestedPresenceDetail
-                label: "Requested Presence"
-                value: account.requestedPresence
-            }
-
-            DetailItem {
-                id: connectionStatusDetail
-                label: "Connection Status"
-                value: account.connectionStatus
-            }
-
-            DetailItem {
-                id: connectionDetail
-                label: "Connection Path"
-                value: account.connectionPath
-            }
-
         }
 
     }
