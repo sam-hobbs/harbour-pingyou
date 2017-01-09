@@ -36,12 +36,130 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QLatin1String>
 #include <TelepathyQt/Connection>
 #include <QDebug>
+#include <TelepathyQt/AvatarData>
+#include <TelepathyQt/AvatarSpec>
 
-//AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : mAcc(acc) {
-//    //Q_UNUSED(acc);
-//    Q_UNUSED(parent);
-//}
+AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc) {
 
+    // bind signals
+    connect(mAcc.data(), SIGNAL(validityChanged(bool)),
+            this, SIGNAL(validChanged(bool)));
+
+    connect(mAcc.data(), SIGNAL(stateChanged(bool)),
+            this, SIGNAL(enabledChanged(bool)));
+
+    // cmName is not notifiable
+    // protocolName is not notifiable
+
+    connect(mAcc.data(), SIGNAL(displayNameChanged(QString)),
+            this, SIGNAL(displayNameChanged(QString)));
+
+    connect(mAcc.data(), SIGNAL(nicknameChanged(QString)),
+            this, SIGNAL(nicknameChanged(QString)));
+
+    connect(mAcc.data(), SIGNAL(connectsAutomaticallyPropertyChanged(bool)),
+            this, SIGNAL(connectsAutomaticallyChanged(bool)));
+
+    connect(mAcc.data(), SIGNAL(changingPresence(bool)),
+            this, SIGNAL(changingPresenceChanged(bool)));
+
+    connect(mAcc.data(), SIGNAL(automaticPresenceChanged(Tp::Presence)),
+            this, SIGNAL(automaticPresenceChanged(Tp::Presence)));
+
+    connect(mAcc.data(), SIGNAL(currentPresenceChanged(Tp::Presence)),
+            this, SIGNAL(currentPresenceChanged(Tp::Presence)));
+
+    connect(mAcc.data(), SIGNAL(requestedPresenceChanged(Tp::Presence)),
+            this, SIGNAL(requestedPresenceChanged(Tp::Presence)));
+
+    connect(mAcc.data(), SIGNAL(connectionStatusChanged(Tp::ConnectionStatus)),
+            this, SIGNAL(connectionStatusChanged(Tp::ConnectionStatus)));
+
+    connect(mAcc.data(), SIGNAL(connectionChanged(Tp::ConnectionPtr)),
+            this, SIGNAL(connectionPathChanged(Tp::ConnectionPtr)));
+
+    connect(mAcc.data(), SIGNAL(onlinenessChanged(bool)),
+            this, SIGNAL(onlineChanged(bool)));
+
+    connect(mAcc.data(), SIGNAL(avatarChanged(Tp::Avatar)),
+            this, SLOT(avatarChanged(Tp::Avatar)));
+
+
+}
+
+
+bool AccountElement::valid() const {
+    return mAcc->isValid();
+}
+
+bool AccountElement::enabled() const {
+    return mAcc->isEnabled();
+}
+
+QString AccountElement::cmName() const {
+    return mAcc->cmName();
+}
+
+QString AccountElement::protocolName() const {
+    return mAcc->protocolName();
+}
+
+QString AccountElement::displayName() const {
+    return mAcc->displayName();
+}
+
+QString AccountElement::nickname() const {
+    qDebug() << "nickname is: " << mAcc->nickname();
+    return mAcc->nickname();
+    //return QString::fromUtf8(mAcc->nickname());
+}
+
+bool AccountElement::connectsAutomatically() const {
+    return mAcc->connectsAutomatically();
+}
+
+bool AccountElement::changingPresence() const {
+    return mAcc->isChangingPresence();
+}
+
+QString AccountElement::automaticPresence() const {
+    return mAcc->automaticPresence().status();
+}
+
+QString AccountElement::currentPresence() const {
+    return mAcc->currentPresence().status();
+}
+
+QString AccountElement::requestedPresence() const {
+    return mAcc->requestedPresence().status();
+}
+
+Tp::ConnectionStatus AccountElement::connectionStatus() const {
+    return mAcc->connectionStatus();
+}
+
+QString AccountElement::connectionPath() const {
+    return mAcc->connection().isNull() ? QString("") : mAcc->connection()->objectPath();
+}
+
+bool AccountElement::online() const {
+    return mAcc->isOnline();
+}
+
+QString AccountElement::avatarPath() const {
+    // TODO avatar() returns Tp::Avatar which is a bytearray but we want Tp::AvatarData
+    //Tp::AvatarData avatar = mAcc->avatar();
+    //qDebug() << "filename is " << avatar.fileName;
+    //return avatar.fileName;
+    //qDebug() << "mimetype is: " << mAcc->avatar.MIMEType; //Tp::Account::avatar does not have class type
+    return QString("/usr/share/icons/hicolor/256x256/apps/harbour-pingyou.png"); // TODO: CHANGEME - just for testing
+}
+
+void AccountElement::avatarChanged(Tp::Avatar avatar) const {
+    //Tp::AvatarData av = avatar;
+    qDebug() << "avatar changed";
+    //emit avatarPathChanged(av.fileName);
+}
 
 // ==========================================================
 
@@ -59,6 +177,7 @@ AccountsModel::AccountsModel(QObject *parent) {
             SLOT(onAMReady(Tp::PendingOperation*))
             );
 
+    //
     connect(mAM.data(),
             SIGNAL(newAccount(const Tp::AccountPtr &)),
             SLOT(addAccountElement(const Tp::AccountPtr &))
@@ -74,69 +193,11 @@ int AccountsModel::rowCount(const QModelIndex &parent) const {
 
 QVariant AccountsModel::data(const QModelIndex &index, int role) const {
 
-    qDebug() << "role is: " << role;
-
     if (role == AccountRole) {
-        Tp::Account * account = myList.at(index.row()).data();
-        // need to use QVariant::fromValue to create a QVariant from a pointer https://stackoverflow.com/questions/34240236/qvariantqvariantvoid-is-private
-        return QVariant::fromValue(account);
+        return QVariant::fromValue(myList.at(index.row()));
     }
+
     return QVariant();
-
-
-//    AccountElement * fobj = myList.at(index.row());
-
-//    if (role == ColumnValid) {
-////        //return QVariant::fromValue(fobj->mAcc->isValid() ? QLatin1String("true") : QLatin1String("false"));
-
-////        bool valid = fobj->mAcc->isValid();
-////        //return QVariant::fromValue( valid ? QLatin1String("true") : QLatin1String("false"));
-
-////        if (valid) {
-////            return QVariant("true");
-////            //return QVariant::fromValue(QLatin1String("true"));
-////        }
-////        else {
-////            //return QVariant::fromValue(QLatin1String("false"));
-////            return QVariant("false");
-////        }
-
-//        return QVariant::fromValue(fobj->mAcc->isValid() ? QVariant("true") : QVariant("false"));
-//    }
-//    else if (role == ColumnEnabled) {
-//        //return QVariant::fromValue(fobj->mAcc->isEnabled() ? "true" : "false");
-//        return QVariant::fromValue(fobj->mAcc->isEnabled() ? QVariant("true") : QVariant("false"));
-//    }
-//    else if (role == ColumnConnectionManager)
-//        return QVariant::fromValue(fobj->mAcc->cmName());
-//    else if (role == ColumnProtocol)
-//        return QVariant::fromValue(fobj->mAcc->protocolName());
-//    else if (role == ColumnDisplayName)
-//        return QVariant::fromValue(fobj->mAcc->displayName());
-//    else if (role == ColumnNickname)
-//        return QVariant::fromValue(fobj->mAcc->nickname());
-//    else if (role == ColumnConnectsAutomatically) {
-//        //return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? "true" : "false");
-//        return QVariant::fromValue(fobj->mAcc->connectsAutomatically() ? QVariant("true") : QVariant("false"));
-//    }
-//    else if (role == ColumnChangingPresence) {
-//        //return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? "true" : "false");
-//        return QVariant::fromValue(fobj->mAcc->isChangingPresence() ? QVariant("true") : QVariant("false"));
-//    }
-//    else if (role == ColumnAutomaticPresence)
-//        return QVariant::fromValue(fobj->mAcc->automaticPresence().status());
-//    else if (role == ColumnCurrentPresence)
-//        return QVariant::fromValue(fobj->mAcc->currentPresence().status());
-//    else if (role == ColumnRequestedPresence)
-//        return QVariant::fromValue(fobj->mAcc->requestedPresence().status());
-//    else if (role == ColumnConnectionStatus) {
-//        //return QVariant::fromValue(fobj->mAcc->connectionStatus());
-//        return QVariant::fromValue(QVariant(fobj->mAcc->connectionStatus()));
-//    }
-//    else if (role == ColumnConnection)
-//        return QVariant::fromValue(fobj->mAcc->connection().isNull() ? "" : fobj->mAcc->connection()->objectPath());
-
-//    return QVariant();
 }
 
 
@@ -180,16 +241,12 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
     }
 }
 
-//void AccountsModel::onNewAccount(const Tp::AccountPtr &acc) {
-//    // TODO: add new item to model
-//}
-
 void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
     qDebug() << "addAccountElement called, adding account with display name " << acc->displayName();
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-    //myList.append(new AccountElement(acc));
-    myList.append(acc);
+    myList.append(new AccountElement(acc));
+    //myList.append(acc);
     endInsertRows();
 }
