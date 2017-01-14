@@ -19,11 +19,13 @@ PKGCONFIG += TelepathyQt5
 QT += quick qml dbus
 
 SOURCES +=  src/harbour-pingyou.cpp \
-    src/accounts-model.cpp
+    src/accounts-model.cpp \
+    src/roster-model.cpp
 
 
 HEADERS += \
-    src/accounts-model.h
+    src/accounts-model.h \
+    src/roster-model.h
 
 
 OTHER_FILES += \
@@ -52,8 +54,8 @@ INCLUDEPATH += /usr/include/qt5/QtDBus
 DISTFILES += \
     qml/harbour-pingyou.qml \
     qml/cover/CoverPage.qml \
-    qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
     qml/pages/AccountsPage.qml \
-    qml/delegates/AccountEntry.qml
+    qml/delegates/AccountEntry.qml \
+    qml/pages/RosterPage.qml \
+    qml/delegates/RosterEntry.qml
 

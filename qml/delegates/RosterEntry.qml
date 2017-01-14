@@ -21,35 +21,24 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 
 */
 
-import QtQuick 2.0
+import QtQuick 2.2
 import Sailfish.Silica 1.0
 
+BackgroundItem {
+    id: delegate
+    height: itemId.height + 10
+    ListItem {
+        id: itemId
+        width: parent.width
+        //contentHeight: expanding.height
 
-Page {
-    id: page
-    SilicaListView {
-        id: listView
-        model: 20
-        anchors.fill: parent
-        header: PageHeader {
-            title: qsTr("Nested Page")
+        DetailItem {
+            id: statusDetail
+            label: contact.contactID
+            value: contact.status
         }
-        delegate: BackgroundItem {
-            id: delegate
 
-            Label {
-                x: Theme.paddingLarge
-                text: qsTr("Item") + " " + index
-                anchors.verticalCenter: parent.verticalCenter
-                color: delegate.highlighted ? Theme.highlightColor : Theme.primaryColor
-            }
-            onClicked: console.log("Clicked " + index)
-        }
-        VerticalScrollDecorator {}
+        // TODO: add contact avatar?
+
     }
 }
-
-
-
-
-

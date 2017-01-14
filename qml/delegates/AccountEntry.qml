@@ -31,12 +31,28 @@ BackgroundItem {
         id: itemId
         width: parent.width
 
+        menu: ContextMenu {
+            MenuItem {
+                text: qsTr("Roster")
+                visible: (account.valid && account.enabled)
+                onClicked: {
+                    console.log("Loading roster for " + account.displayName)
+                    account.setActiveAccount();
+                    pageStack.push(Qt.resolvedUrl("../pages/RosterPage.qml"))
+                }
+            }
+
+            MenuItem {
+                text: qsTr("Enable")
+            }
+        }
+
         contentHeight: expanding.height
 
         ExpandingSection {
             id: expanding
             title: (account.valid && account.enabled) ? account.displayName + " (enabled)" : account.displayName + " (disabled)"
-            expanded: (account.enabled && account.enabled)
+            expanded: (account.valid && account.enabled)
             content.sourceComponent:
 
             Column {

@@ -28,6 +28,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Account>
 #include <TelepathyQt/AccountFactory>
 #include <TelepathyQt/AccountManager>
+#include <TelepathyQt/ConnectionFactory>
 #include <TelepathyQt/PendingOperation>
 #include <TelepathyQt/PendingReady>
 #include <TelepathyQt/SharedPtr>
@@ -156,10 +157,21 @@ QString AccountElement::avatarPath() const {
 }
 
 void AccountElement::avatarChanged(Tp::Avatar avatar) const {
+    Q_UNUSED(avatar);
     //Tp::AvatarData av = avatar;
     qDebug() << "avatar changed";
     //emit avatarPathChanged(av.fileName);
 }
+
+Tp::AccountPtr AccountElement::getAccountPtr() {
+    return mAcc;
+}
+
+// method invokable from QML for emitting signal that sets this account active in roster etc.
+void AccountElement::setActiveAccount() {
+    emit setThisAccountActive(getAccountPtr());
+}
+
 
 // ==========================================================
 
@@ -167,9 +179,21 @@ void AccountElement::avatarChanged(Tp::Avatar avatar) const {
 AccountsModel::AccountsModel(QObject *parent) {
     Q_UNUSED(parent);
 
+//    mAM = Tp::AccountManager::create(
+//                Tp::AccountFactory::create(QDBusConnection::sessionBus(),
+//                Tp::Account::FeatureCore)
+//                );
+
+    // TODO: change options so that roster is retrieved
     mAM = Tp::AccountManager::create(
-                Tp::AccountFactory::create(QDBusConnection::sessionBus(),
-                Tp::Account::FeatureCore)
+                // QDbusConnection &dbus,
+                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore),
+                // ConnectionFactoryConstPtr &connectionFactory <<<<<<<<<<<<<<<<<<<<<<<<<
+                Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups),
+                // ChannelFactoryConstPtr &channelFactory
+                Tp::ChannelFactory::create(QDBusConnection::sessionBus()),
+                // ContactFactoryConstPtr &contactFactory
+                Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence)
                 );
 
     connect(mAM->becomeReady(),
@@ -206,20 +230,6 @@ QHash<int, QByteArray> AccountsModel::roleNames() const {
 
     roles[AccountRole] = "account";
 
-//    roles[ColumnValid] = "valid";
-//    roles[ColumnEnabled] = "enabled";
-//    roles[ColumnConnectionManager] = "connection_manager";
-//    roles[ColumnProtocol] = "protocol";
-//    roles[ColumnDisplayName] = "display_name";
-//    roles[ColumnNickname] = "nickname";
-//    roles[ColumnConnectsAutomatically] = "connects_automatically";
-//    roles[ColumnChangingPresence] = "changing_presence";
-//    roles[ColumnAutomaticPresence] = "automatic_presence";
-//    roles[ColumnCurrentPresence] = "current_presence";
-//    roles[ColumnRequestedPresence] = "requested_presence";
-//    roles[ColumnConnectionStatus] = "connection_status";
-//    roles[ColumnConnection] = "connection";
-
     return roles;
 }
 
@@ -239,6 +249,17 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
             qDebug() << "Skipped account with display name " << acc->displayName() << " because it is of type " << acc->protocolName();
         }
     }
+
+    // if number of valid accounts is 1 or more, emit signal with account pointer so that the rosterModel can update its data
+    if (numValidAccounts() > 0) {
+        foreach (AccountElement * account, myList) {
+            if (account->valid() && account->enabled()) {
+                qDebug() << "valid and enabled account found, emitting signal";
+                emit newAccountPtr(account->getAccountPtr());
+                break;
+            }
+        }
+    }
 }
 
 void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
@@ -249,4 +270,29 @@ void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
     myList.append(new AccountElement(acc));
     //myList.append(acc);
     endInsertRows();
+
+    // when the new AccountElement requests that it become the active account in the rosterModel, pass on the signal
+    connect(myList.last(),SIGNAL(setThisAccountActive(Tp::AccountPtr)),
+            SIGNAL(newAccountPtr(Tp::AccountPtr)));
+}
+
+
+bool AccountsModel::numValidAccounts() const {
+
+    int numValid = 0;
+
+    //qDebug() << "counting valid accounts";
+
+    // loop through the list of AccountElement objects and if the element is valid and enabled, add it to the count
+    foreach (AccountElement * account, myList) {
+        if (account->valid() && account->enabled()) {
+            //qDebug() << "valid and enabled account found";
+            numValid++;
+        } else {
+            //qDebug() << "account not valid";
+        }
+    }
+
+    qDebug() << "final count of valid accounts is: " << numValid;
+    return numValid;
 }

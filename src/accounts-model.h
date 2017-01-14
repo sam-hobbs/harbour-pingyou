@@ -30,19 +30,12 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QAbstractListModel>
 #include <TelepathyQt/AvatarData>
 
-#include "accounts-model.h"
-
-// https://doc.qt.io/qt-5/qtquick-modelviewsdata-modelview.html
-// https://doc.qt.io/qt-5/qtquick-modelviewsdata-cppmodels.html
-
 
 namespace Tp {
 class AccountManager;
 class PendingOperation;
 }
 
-
-// use qmlRegisterUncreatableType for this?
 
 class AccountElement : public QObject
 {
@@ -89,6 +82,10 @@ public:
 
     QString avatarPath() const;
 
+    Tp::AccountPtr getAccountPtr();
+
+    Q_INVOKABLE void setActiveAccount();
+
 signals:
     void validChanged(bool);
     void enabledChanged(bool);
@@ -111,6 +108,8 @@ signals:
 
     void avatarPathChanged(QString);
 
+    void setThisAccountActive(Tp::AccountPtr);
+
 public slots:
 
     void avatarChanged(Tp::Avatar) const;
@@ -128,6 +127,7 @@ class AccountsModel : public QAbstractListModel
 {
 
     Q_OBJECT
+    Q_PROPERTY( int numValidAccounts READ numValidAccounts NOTIFY numValidAccountsChanged)
 
 public:
     AccountsModel(QObject *parent = 0);
@@ -142,6 +142,13 @@ public:
     };
 
     Q_ENUMS(Columns)
+
+    bool numValidAccounts() const;
+    //Tp::AccountPtr returnFirstValidAccountPtr() const;
+
+signals:
+    void newAccountPtr(Tp::AccountPtr);
+    void numValidAccountsChanged(bool);
 
 protected:
     QHash<int, QByteArray> roleNames() const; // exposes role names so they can be accessed via QML

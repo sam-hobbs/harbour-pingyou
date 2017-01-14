@@ -21,16 +21,36 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 
 */
 
-import QtQuick 2.0
+import QtQuick 2.2
 import Sailfish.Silica 1.0
-import "pages"
 
-ApplicationWindow
-{
-    initialPage: Component { AccountsPage { } }
-    cover: Qt.resolvedUrl("cover/CoverPage.qml")
+import "../delegates"
+
+Page {
+    id: page
     allowedOrientations: Orientation.All
-    _defaultPageOrientations: Orientation.All
+
+    SilicaListView {
+        id: listView
+        anchors.fill: parent
+        width: parent.width
+        header: PageHeader {
+            title: "Roster"
+        }
+
+        model: rosterModel
+        delegate: RosterEntry {}
+
+        VerticalScrollDecorator {}
+
+    }
+
+//    property bool firstLoad: true
+//    onStatusChanged: {
+//        if (status == PageStatus.Active && firstLoad) {
+//            firstLoad = false
+//            rosterModel.setAccountPath("develtest@samhobbs.co.uk")
+//        }
+//    }
+
 }
-
-
