@@ -30,15 +30,118 @@ BackgroundItem {
     ListItem {
         id: itemId
         width: parent.width
-        //contentHeight: expanding.height
+        contentHeight: column.height
 
-        DetailItem {
-            id: statusDetail
-            label: contact.contactID
-            value: contact.status
+        Column {
+            id: column
+            width: parent.width
+
+            Label {
+                id: contactID
+                text: contact.contactID
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            DetailItem {
+                id: statusDetail
+                label: "Status"
+                value: contact.status
+            }
+
+            DetailItem {
+                id: publishDetail
+                label: "Publish state"
+                value: contact.publishState
+            }
+
+            DetailItem {
+                id: subscriptionDetail
+                label: "Subscription state"
+                value: contact.subscriptionState
+            }
+
+            DetailItem {
+                id: blockDetail
+                label: "Block state"
+                value: contact.blocked
+            }
+
+
+
+
+            DetailItem {
+                id: canAuthorisePub
+                label: "Can authorise publication"
+                value: contact.canAuthorisePublication
+            }
+
+            DetailItem {
+                id: canRemovePub
+                label: "Can remove publication"
+                value: contact.canRemovePublication
+            }
+
+            DetailItem {
+                id: canBlock
+                label: "Can block contacts"
+                value: contact.blocked
+            }
+
+            DetailItem {
+                id: canRequestSub
+                label: "Can request subscription"
+                value: contact.canRequestPresenceSubscription
+            }
+
+            DetailItem {
+                id: canRescindSubRequest
+                label: "Can rescind subscription request"
+                value: contact.canRescindPresenceSubscriptionRequest
+            }
         }
 
         // TODO: add contact avatar?
+
+
+        menu: ContextMenu {
+            MenuItem {
+                text: qsTr("Authorise presence publication")
+                visible: (contact.canAuthorisePublication && (contact.publishState === "ask"))
+                onClicked: contact.authPubAction()
+            }
+
+            MenuItem {
+                text: qsTr("Deny presence publication")
+                visible: (contact.canRemovePublication && (contact.publishState === "ask"))
+                onClicked: contact.denyPubAction()
+            }
+
+            MenuItem {
+                text: qsTr("Remove presence pub & sub")
+                visible: (contact.canRemovePublication && (contact.publishState === "yes"))
+                onClicked: contact.removePubAction()
+            }
+
+            MenuItem {
+                text: contact.blocked ? qsTr("Unblock") : qsTr("Block")
+                visible: contact.canBlockContacts
+                onClicked: contact.toggleBlockAction()
+            }
+
+            MenuItem {
+                text: qsTr("Request presence subscription")
+                visible: (contact.canRescindPresenceSubscriptionRequest && (contact.subscriptionState === "no"))
+                onClicked: contact.requestSubAction()
+            }
+
+            MenuItem {
+                text: qsTr("Rescind presence subscription request")
+                visible: (contact.canRescindPresenceSubscriptionRequest && (contact.subscriptionState === "ask"))
+                onClicked: contact.rescindSubRequestAction()
+            }
+
+        }
 
     }
 }

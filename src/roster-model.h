@@ -45,6 +45,18 @@ class RosterElement : public QObject
     Q_PROPERTY(QString contactID READ contactID NOTIFY contactIDChanged) // constant ?
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
 
+    Q_PROPERTY(QString publishState READ publishState NOTIFY publishStateChanged)
+    Q_PROPERTY(QString subscriptionState READ subscriptionState NOTIFY subscriptionStateChanged)
+    Q_PROPERTY(bool blocked READ blocked NOTIFY blockedChanged)
+
+    // these properties hold information about the capabilities of the contact manager, used to decide which actions are enabled
+    Q_PROPERTY(bool canAuthorisePublication READ canAuthorisePublication CONSTANT)
+    Q_PROPERTY(bool canRemovePublication READ canRemovePublication CONSTANT)
+    Q_PROPERTY(bool canBlockContacts READ canBlockContacts CONSTANT)
+    Q_PROPERTY(bool canRequestPresenceSubscription READ canRequestPresenceSubscription CONSTANT)
+    Q_PROPERTY(bool canRescindPresenceSubscriptionRequest READ canRescindPresenceSubscriptionRequest CONSTANT)
+    
+
 public:
     RosterElement (Tp::ContactPtr contact, QObject *parent = 0);
     ~RosterElement();
@@ -54,9 +66,31 @@ public:
     QString contactID() const;
     QString status() const;
 
+    QString publishState() const;
+    QString subscriptionState() const;
+    bool blocked() const;
+
+    bool canAuthorisePublication() const;
+    bool canRemovePublication() const;
+    bool canBlockContacts() const;
+    bool canRequestPresencePublication() const;
+    bool canRequestPresenceSubscription() const;
+    bool canRescindPresenceSubscriptionRequest() const;
+
+    Q_INVOKABLE void authPubAction(); // authorise presence publication
+    Q_INVOKABLE void denyPubAction(); // deny presence publication
+    Q_INVOKABLE void removePubAction(); // remove presence publication and subscription
+    Q_INVOKABLE void toggleBlockAction(); // block or unblock contact
+    Q_INVOKABLE void requestSubAction(); // request presence subscription from this contact
+    Q_INVOKABLE void rescindSubRequestAction(); // cancel presence subscription request
+
 signals:
     void contactIDChanged();
     void statusChanged();
+
+    void publishStateChanged();
+    void subscriptionStateChanged();
+    void blockedChanged();
 
 private Q_SLOTS:
     void onContactChanged();
@@ -79,10 +113,6 @@ public:
     //virtual ~RosterModel();
     ~RosterModel();
 
-    //Q_INVOKABLE void setAccountPath(Tp::AccountPtr) const;
-    //Q_INVOKABLE void setAccount(Tp::AccountPtr) const;
-
-
     Tp::ConnectionPtr connection() const {return mConn; }
     void setConnection(const Tp::ConnectionPtr &conn);
     void unsetConnection();
@@ -102,6 +132,7 @@ public:
 public Q_SLOTS:
     Q_INVOKABLE void setAccount(Tp::AccountPtr);
     void onAccountConnectionChanged(const Tp::ConnectionPtr &conn);
+    void refreshRoster();
 
 protected:
     virtual RosterElement *createItemForContact(const Tp::ContactPtr &contact, bool &exists);

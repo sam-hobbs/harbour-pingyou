@@ -43,7 +43,7 @@ BackgroundItem {
             }
 
             MenuItem {
-                text: qsTr("Enable")
+                text: qsTr("Foo")
             }
         }
 

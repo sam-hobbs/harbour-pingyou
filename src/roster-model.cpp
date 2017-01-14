@@ -60,6 +60,22 @@ RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject
             SLOT(onContactChanged())
             );
 
+    // connect signals
+    connect(contact.data(),
+            SIGNAL(publishStateChanged(Tp::Contact::PresenceState,QString)),
+            SIGNAL(publishStateChanged())
+            );
+
+    connect(contact.data(),
+            SIGNAL(subscriptionStateChanged(Tp::Contact::PresenceState)),
+            SIGNAL(subscriptionStateChanged())
+            );
+
+    connect(contact.data(),
+            SIGNAL(blockStatusChanged(bool)),
+            SIGNAL(blockedChanged())
+            );
+
 }
 
 RosterElement::~RosterElement() {
@@ -68,32 +84,34 @@ RosterElement::~RosterElement() {
 
 
 void RosterElement::onContactChanged() {
-    QString status = mContact->presence().status();
 
-    // if I've asked to see the contact presence
-    if (mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
-        mStatus = status + " (awaiting approval)";
-    }
+//    QString status = mContact->presence().status();
 
-    // if the contact asked to see my presence
+//    // if I've asked to see the contact presence
+//    if (mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
+//        mStatus = status + " (awaiting approval)";
+//    }
 
-    else if (mContact->publishState() == Tp::Contact::PresenceStateAsk) {
-        mStatus = status + " (pending approval)";
-    }
+//    // if the contact asked to see my presence
 
-    else if (mContact->subscriptionState() == Tp::Contact::PresenceStateNo && mContact->publishState() == Tp::Contact::PresenceStateNo) {
-        mStatus = status + " (unknown)";
-    }
+//    else if (mContact->publishState() == Tp::Contact::PresenceStateAsk) {
+//        mStatus = status + " (pending approval)";
+//    }
 
-    else {
-        mStatus = status;
-    }
+//    else if (mContact->subscriptionState() == Tp::Contact::PresenceStateNo && mContact->publishState() == Tp::Contact::PresenceStateNo) {
+//        mStatus = status + " (unknown)";
+//    }
 
-    // if the contact is blocked, override the status to blocked
-    if (mContact->isBlocked()) {
-        mStatus = status + " (blocked)";
-    }
+//    else {
+//        mStatus = status;
+//    }
 
+//    // if the contact is blocked, override the status to blocked
+//    if (mContact->isBlocked()) {
+//        mStatus = status + " (blocked)";
+//    }
+
+    mStatus = mContact->presence().status();
     emit statusChanged();
 
 }
@@ -106,7 +124,107 @@ QString RosterElement::status() const {
     return mStatus;
 }
 
+void RosterElement::authPubAction() {
+    qDebug() << "Auth pub action triggered";
+    if (mContact->publishState() != Tp::Contact::PresenceStateYes )
+        mContact->authorizePresencePublication();
+}
 
+void RosterElement::denyPubAction() {
+    qDebug() << "Deny pub action triggered";
+    if (mContact->publishState() != Tp::Contact::PresenceStateNo)
+        mContact->removePresencePublication();
+}
+
+void RosterElement::removePubAction() {
+    qDebug() << "Remove pub action triggered";
+    if(mContact->subscriptionState() != Tp::Contact::PresenceStateNo) {
+        mContact->removePresencePublication();
+        mContact->removePresenceSubscription();
+    }
+}
+
+void RosterElement::toggleBlockAction() {
+    qDebug() << "toggle block action triggered";
+    if(mContact->isBlocked()) {
+        qDebug() << "Unblocking contact";
+        mContact->unblock();
+    } else {
+        qDebug() << "Blocking contact";
+        mContact->block();
+    }
+}
+
+void RosterElement::requestSubAction() {
+    qDebug() << "request sub action triggered";
+    if(mContact->subscriptionState() == Tp::Contact::PresenceStateNo) {
+        mContact->requestPresenceSubscription();
+    }
+}
+
+
+void RosterElement::rescindSubRequestAction() {
+    qDebug() << "rescind sub request action triggered";
+    if(mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
+        mContact->removePresenceSubscription();
+    }
+}
+
+
+
+
+
+
+QString RosterElement::publishState() const {
+
+    if (mContact->publishState() == Tp::Contact::PresenceStateYes) {
+        return QString("yes");
+    } else if (mContact->publishState() == Tp::Contact::PresenceStateNo) {
+        return QString("no");
+    } else if (mContact->publishState() == Tp::Contact::PresenceStateAsk) {
+        return QString("ask");
+    }
+
+    return QString("");
+}
+
+QString RosterElement::subscriptionState() const {
+
+    if (mContact->subscriptionState() == Tp::Contact::PresenceStateYes) {
+        return QString("yes");
+    } else if (mContact->subscriptionState() == Tp::Contact::PresenceStateNo) {
+        return QString("no");
+    } else if (mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
+        return QString("ask");
+    }
+
+    return QString("");
+}
+
+bool RosterElement::blocked() const {
+    return mContact->isBlocked();
+}
+
+
+bool RosterElement::canAuthorisePublication() const {
+    return mContact->manager()->canAuthorizePresencePublication();
+}
+
+bool RosterElement::canRemovePublication() const {
+    return mContact->manager()->canRemovePresencePublication();
+}
+
+bool RosterElement::canBlockContacts() const {
+    return mContact->manager()->canBlockContacts();
+}
+
+bool RosterElement::canRequestPresenceSubscription() const {
+    return mContact->manager()->canRequestPresenceSubscription();
+}
+
+bool RosterElement::canRescindPresenceSubscriptionRequest() const {
+    return mContact->manager()->canRescindPresenceSubscriptionRequest();
+}
 
 // =============================================================
 
@@ -134,7 +252,10 @@ void RosterModel::setConnection(const Tp::ConnectionPtr &conn) {
             SIGNAL(presencePublicationRequested(const Tp::Contacts &)),
             SLOT(onPresencePublicationRequested(const Tp::Contacts &)));
 
-    // TODO from TelepathyQt examples: listen to allKnownContactsChanged
+    connect(conn->contactManager().data(),
+            SIGNAL(allKnownContactsChanged(Tp::Contacts,Tp::Contacts,Tp::Channel::GroupMemberChangeDetails)),
+            SLOT(refreshRoster())
+            );
 
     connect(conn->contactManager().data(),
             SIGNAL(stateChanged(Tp::ContactListState)),
@@ -264,6 +385,13 @@ void RosterModel::setAccount(Tp::AccountPtr account) {
     // refresh all data
     onAccountConnectionChanged(mAccount->connection());
 
+}
+
+void RosterModel::refreshRoster() {
+    // force a refresh of the roster
+    qDebug() << "Refresh roster called";
+    unsetConnection(); // clear the model
+    onContactManagerStateChanged(mConn->contactManager()->state()); // refresh the model using the existing connection
 }
 
 
