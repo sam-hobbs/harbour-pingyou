@@ -44,6 +44,7 @@ Dialog {
             label: "Jabber ID"
             focus: true
             validator: RegExpValidator { regExp: /^\w+@\w+(\.\w+)+$/ }
+            inputMethodHints : Qt.ImhEmailCharactersOnly
         }
     }
 
