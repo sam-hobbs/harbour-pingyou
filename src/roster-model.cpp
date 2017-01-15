@@ -339,38 +339,20 @@ void RosterModel::onContactManagerStateChanged(Tp::ContactListState state) {
 
     if (state == Tp::ContactListStateSuccess) {
         qDebug() << "Loading contacts";
-        RosterElement *item;
-        bool exists;
         foreach (const Tp::ContactPtr &contact, mConn->contactManager()->allKnownContacts()) {
-            exists = false;
-            item = createItemForContact(contact, exists);
-            if(!exists) {
-                beginInsertRows(QModelIndex(), rowCount(), rowCount());
-                mList.append(item);
-                endInsertRows();
-            }
+            addContactToModel(contact);
         }
     } else {
-        qDebug() << "Contact list not retrieved, not loading contacts";
+        qDebug() << "Contact list not retrieved, can't load contacts";
     }
 }
 
 
 void RosterModel::onPresencePublicationRequested(const Tp::Contacts &contacts) {
-
     // when someone adds us as a contact, check if the contact is already in the list and add a new RosterElement for the contact if not
-
     qDebug() << "Presence publication requested";
-    RosterElement *item;
-    bool exists;
     foreach (const Tp::ContactPtr &contact, contacts) {
-        exists = false;
-        item = createItemForContact(contact, exists);
-        if(!exists) {
-            beginInsertRows(QModelIndex(), rowCount(), rowCount());
-            mList.append(item);
-            endInsertRows();
-        }
+        addContactToModel(contact);
     }
 }
 
@@ -393,14 +375,7 @@ void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
     }
 
     Tp::ContactPtr contact = contacts.first();
-    qDebug() << "Request presence subscription for contact " << username;
-    bool exists = false;
-    RosterElement *item = createItemForContact(contact,exists);
-    if(!exists) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        mList.append(item);
-        endInsertRows();
-    }
+    addContactToModel(contact);
     contact->requestPresenceSubscription();
 
 }
@@ -427,15 +402,22 @@ void RosterModel::onKnownContactsChanged(Tp::Contacts contactsAdded,Tp::Contacts
 
     // add new contacts
     foreach (const Tp::ContactPtr &contact, contactsAdded) {
-        bool exists = false;
-        RosterElement *item = createItemForContact(contact, exists);
-        if(exists) {
-            qDebug() << "Contact " << item->contactID() << " already exists";
+
+        // if the contact is not blocked, and we neither subscribe to or publish presence for that contact, it has probably been removed and we don't want to see it in the roster
+        if (contact->publishState() == Tp::Contact::PresenceStateNo && contact->subscriptionState() == Tp::Contact::PresenceStateNo && !contact->isBlocked()) {
+            qDebug() << "Contact " << contact->id() << " will not be added to the roster because there is no presence subscription or publication";
         } else {
-            qDebug() << "Adding contact " << item->contactID();
-            beginInsertRows(QModelIndex(), rowCount(), rowCount());
-            mList.append(item);
-            endInsertRows();
+
+            bool exists = false;
+            RosterElement *item = createItemForContact(contact, exists);
+            if(exists) {
+                qDebug() << "Contact " << item->contactID() << " already exists";
+            } else {
+                qDebug() << "Adding contact " << item->contactID();
+                beginInsertRows(QModelIndex(), rowCount(), rowCount());
+                mList.append(item);
+                endInsertRows();
+            }
         }
     }
 
@@ -459,6 +441,30 @@ void RosterModel::onKnownContactsChanged(Tp::Contacts contactsAdded,Tp::Contacts
 
 }
 
+
+void RosterModel::addContactToModel(const Tp::ContactPtr &contact) {
+
+    if (!contact) {
+        qWarning() << "null pointer passed to addContactToModel function";
+        return;
+    }
+
+    // if the contact is not blocked, and we neither subscribe to or publish presence for that contact, they have probably been removed and we don't want to see them in the roster
+    if (contact->publishState() == Tp::Contact::PresenceStateNo && contact->subscriptionState() == Tp::Contact::PresenceStateNo && !contact->isBlocked()) {
+        qDebug() << "Contact " << contact->id() << " will not be added to the roster because they are not blocked and there is no presence subscription or publication";
+    } else {
+        bool exists = false;
+        RosterElement *item = createItemForContact(contact, exists);
+        if(exists) {
+            qDebug() << "Contact " << item->contactID() << " already exists";
+        } else {
+            qDebug() << "Adding contact " << item->contactID();
+            beginInsertRows(QModelIndex(), rowCount(), rowCount());
+            mList.append(item);
+            endInsertRows();
+        }
+    }
+}
 
 
 

@@ -103,7 +103,7 @@ private Q_SLOTS:
     void onAvatarTokenChanged(QString);
     void onAvatarDataChanged(Tp::AvatarData);
 
-private:   
+private:
     Tp::ContactPtr mContact;
     QString mStatus;
     QString mAvatarToken;
@@ -156,6 +156,8 @@ private Q_SLOTS:
     void onContactRetrieved(Tp::PendingOperation *op);
 
 private:
+    void addContactToModel(const Tp::ContactPtr &);
+
     QList<RosterElement *> mList;
     Tp::ConnectionPtr mConn;
     //QString mAccountPath; // holds account name for account whose roster data we are currently viewing

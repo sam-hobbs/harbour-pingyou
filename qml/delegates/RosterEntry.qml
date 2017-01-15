@@ -26,7 +26,8 @@ import Sailfish.Silica 1.0
 
 BackgroundItem {
     id: delegate
-    height: itemId.height + 10
+    visible: !(contact.publishState === "no" && contact.subscriptionState === "no")
+    height: visible ? itemId.height + 10 : 0
     ListItem {
         id: itemId
         width: parent.width
@@ -128,7 +129,7 @@ BackgroundItem {
             }
 
             MenuItem {
-                text: qsTr("Remove presence pub & sub")
+                text: qsTr("Remove contact")
                 visible: (contact.canRemovePublication && (contact.publishState === "yes"))
                 onClicked: contact.removePubAction()
             }
