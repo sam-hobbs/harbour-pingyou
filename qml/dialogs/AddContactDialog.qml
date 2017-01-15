@@ -24,33 +24,32 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 import QtQuick 2.2
 import Sailfish.Silica 1.0
 
-import "../delegates"
+Dialog {
 
-Page {
-    id: page
-    allowedOrientations: Orientation.All
+    canAccept: jabberIDField.acceptableInput
 
-    SilicaListView {
-
-        PullDownMenu {
-            MenuItem {
-                text: qsTr("Add contact")
-                onClicked: pageStack.push(Qt.resolvedUrl("../dialogs/AddContactDialog.qml"))
-            }
-        }
-
-        id: listView
-        anchors.fill: parent
+    Column {
         width: parent.width
-        header: PageHeader {
-            title: "Roster"
+
+        DialogHeader {
+            id: header
+            title: "Add contact"
+            acceptText: "Add"
         }
 
-        model: rosterModel
-        delegate: RosterEntry {}
-
-        VerticalScrollDecorator {}
-
+        TextField {
+            id: jabberIDField
+            width: parent.width
+            placeholderText: "romeo@montague.net"
+            label: "Jabber ID"
+            focus: true
+            validator: RegExpValidator { regExp: /^\w+@\w+(\.\w+)+$/ }
+        }
     }
 
+    onDone: {
+        if (result == DialogResult.Accepted) {
+            rosterModel.addContact(jabberIDField.text)
+        }
+    }
 }

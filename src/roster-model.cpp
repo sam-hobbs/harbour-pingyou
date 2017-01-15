@@ -79,7 +79,7 @@ RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject
 }
 
 RosterElement::~RosterElement() {
-
+    qDebug() << "RosterElement destructor called";
 }
 
 
@@ -254,7 +254,7 @@ void RosterModel::setConnection(const Tp::ConnectionPtr &conn) {
 
     connect(conn->contactManager().data(),
             SIGNAL(allKnownContactsChanged(Tp::Contacts,Tp::Contacts,Tp::Channel::GroupMemberChangeDetails)),
-            SLOT(refreshRoster())
+            SLOT(onKnownContactsChanged(Tp::Contacts,Tp::Contacts,Tp::Channel::GroupMemberChangeDetails))
             );
 
     connect(conn->contactManager().data(),
@@ -273,7 +273,9 @@ void RosterModel::unsetConnection() {
     // remove existing RosterElements from the list and then delete them
     while (mList.count() > 0) {
         RosterElement * item = mList.at(0); // get pointer to current item for deletion later
+        beginRemoveRows(QModelIndex(), 0, 0);
         mList.takeAt(0);
+        endRemoveRows();
         delete item;
     }
     mConn.reset();
@@ -316,8 +318,9 @@ void RosterModel::onContactManagerStateChanged(Tp::ContactListState state) {
             exists = false;
             item = createItemForContact(contact, exists);
             if(!exists) {
-                // connect signals and slots?
+                beginInsertRows(QModelIndex(), rowCount(), rowCount());
                 mList.append(item);
+                endInsertRows();
             }
         }
     } else {
@@ -337,8 +340,9 @@ void RosterModel::onPresencePublicationRequested(const Tp::Contacts &contacts) {
         exists = false;
         item = createItemForContact(contact, exists);
         if(!exists) {
-            // connect signals and slots?
+            beginInsertRows(QModelIndex(), rowCount(), rowCount());
             mList.append(item);
+            endInsertRows();
         }
     }
 }
@@ -355,7 +359,8 @@ void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
 
     QString username = pcontacts->identifiers().first();
 
-    if (contacts.size() !=1 || contacts.first()) {
+    // if there is more than one contact in the list of contacts, or the first contact pointer is not valid, print error and return
+    if (contacts.size() !=1 || !contacts.first()) {
         qWarning() << "Unable to add contact: " << username;
         return;
     }
@@ -365,8 +370,9 @@ void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
     bool exists = false;
     RosterElement *item = createItemForContact(contact,exists);
     if(!exists) {
-        // connect signals and slots?
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         mList.append(item);
+        endInsertRows();
     }
     contact->requestPresenceSubscription();
 
@@ -387,11 +393,55 @@ void RosterModel::setAccount(Tp::AccountPtr account) {
 
 }
 
-void RosterModel::refreshRoster() {
-    // force a refresh of the roster
-    qDebug() << "Refresh roster called";
-    unsetConnection(); // clear the model
-    onContactManagerStateChanged(mConn->contactManager()->state()); // refresh the model using the existing connection
+void RosterModel::onKnownContactsChanged(Tp::Contacts contactsAdded,Tp::Contacts contactsRemoved,Tp::Channel::GroupMemberChangeDetails details) {
+    Q_UNUSED(details);
+
+    qDebug() << "onKnownContactsChanged called, adding " << contactsAdded.size() << " contacts, removing " << contactsRemoved.size() << " contacts.";
+
+    // add new contacts
+    foreach (const Tp::ContactPtr &contact, contactsAdded) {
+        bool exists = false;
+        RosterElement *item = createItemForContact(contact, exists);
+        if(exists) {
+            qDebug() << "Contact " << item->contactID() << " already exists";
+        } else {
+            qDebug() << "Adding contact " << item->contactID();
+            beginInsertRows(QModelIndex(), rowCount(), rowCount());
+            mList.append(item);
+            endInsertRows();
+        }
+    }
+
+    // remove contacts by comparing contact IDs
+    foreach (const Tp::ContactPtr &contact, contactsRemoved) {
+
+        QString name = contact->id();
+        qDebug() << "searching for contact " << name;
+
+        for( int i=0; i<mList.count(); ++i ) {
+            if ( mList.at(i)->contactID() == name ) {
+                qDebug() << "found contact, deleting";
+                RosterElement * item = mList.at(i);
+                beginRemoveRows(QModelIndex(), i, i);
+                mList.takeAt(i);
+                endRemoveRows();
+                delete item;
+            }
+        }
+    }
+
+}
+
+
+
+
+void RosterModel::addContact(QString JID) {
+    qDebug() << "Adding contact with Jabber ID: " << JID;
+    Tp::PendingContacts *pcontacts = mConn->contactManager()->contactsForIdentifiers(QStringList() << JID);
+    connect(pcontacts,
+            SIGNAL(finished(Tp::PendingOperation*)),
+            SLOT(onContactRetrieved(Tp::PendingOperation*))
+            );
 }
 
 

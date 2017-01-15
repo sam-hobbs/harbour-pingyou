@@ -184,16 +184,11 @@ AccountsModel::AccountsModel(QObject *parent) {
 //                Tp::Account::FeatureCore)
 //                );
 
-    // TODO: change options so that roster is retrieved
     mAM = Tp::AccountManager::create(
-                // QDbusConnection &dbus,
-                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore),
-                // ConnectionFactoryConstPtr &connectionFactory <<<<<<<<<<<<<<<<<<<<<<<<<
-                Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups),
-                // ChannelFactoryConstPtr &channelFactory
+                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile, Tp::Account::FeatureProtocolInfo
+                Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups), // unused options: Tp::Connection::FeatureAccountBalance, Tp::Connection::FeatureCore, Tp::Connection::FeatureSelfContact, Tp::Connection::FeatureSimplePresence
                 Tp::ChannelFactory::create(QDBusConnection::sessionBus()),
-                // ContactFactoryConstPtr &contactFactory
-                Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence)
+                Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence) // unused options: Tp::Contact::FeatureAddresses, Tp::Contact::FeatureAvatarData, Tp::Contact::FeatureAvatarToken, Tp::Contact::FeatureCapabilities, Tp::Contact::FeatureClientTypes, Tp::Contact::FeatureInfo, Tp::Contact::FeatureLocation, Tp::Contact::FeatureRosterGroups
                 );
 
     connect(mAM->becomeReady(),
@@ -201,7 +196,6 @@ AccountsModel::AccountsModel(QObject *parent) {
             SLOT(onAMReady(Tp::PendingOperation*))
             );
 
-    //
     connect(mAM.data(),
             SIGNAL(newAccount(const Tp::AccountPtr &)),
             SLOT(addAccountElement(const Tp::AccountPtr &))
@@ -254,7 +248,7 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
     if (numValidAccounts() > 0) {
         foreach (AccountElement * account, myList) {
             if (account->valid() && account->enabled()) {
-                qDebug() << "valid and enabled account found, emitting signal";
+                //qDebug() << "valid and enabled account found, emitting signal";
                 emit newAccountPtr(account->getAccountPtr());
                 break;
             }

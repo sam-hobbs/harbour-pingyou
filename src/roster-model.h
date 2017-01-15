@@ -129,10 +129,12 @@ public:
 
     Q_ENUMS(Columns)
 
+    Q_INVOKABLE void addContact(QString);
+
 public Q_SLOTS:
     Q_INVOKABLE void setAccount(Tp::AccountPtr);
     void onAccountConnectionChanged(const Tp::ConnectionPtr &conn);
-    void refreshRoster();
+    void onKnownContactsChanged(Tp::Contacts,Tp::Contacts,Tp::Channel::GroupMemberChangeDetails);
 
 protected:
     virtual RosterElement *createItemForContact(const Tp::ContactPtr &contact, bool &exists);

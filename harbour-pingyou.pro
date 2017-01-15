@@ -57,5 +57,6 @@ DISTFILES += \
     qml/pages/AccountsPage.qml \
     qml/delegates/AccountEntry.qml \
     qml/pages/RosterPage.qml \
-    qml/delegates/RosterEntry.qml
+    qml/delegates/RosterEntry.qml \
+    qml/dialogs/AddContactDialog.qml
 
