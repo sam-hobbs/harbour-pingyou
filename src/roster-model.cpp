@@ -33,6 +33,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Presence>
 #include <QObject>
 #include <QDebug>
+#include <QEventLoop>
 
 
 #include "roster-model.h"
@@ -358,6 +359,7 @@ void RosterModel::onPresencePublicationRequested(const Tp::Contacts &contacts) {
 
 
 void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
+    qDebug() << "Contacts received from request started in addContact";
 
     Tp::PendingContacts *pcontacts = qobject_cast<Tp::PendingContacts *>(op);
 
@@ -375,9 +377,17 @@ void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
     }
 
     Tp::ContactPtr contact = contacts.first();
-    addContactToModel(contact);
-    contact->requestPresenceSubscription();
+    qDebug() << "Requesting presence subscription to " << contact->id();
 
+    // request presence subscription and wait for subscription state to change before continuing - if the pub and sub states are both "no", the contact will not be added to the roster model
+    QEventLoop pause;
+    connect(contact.data(), SIGNAL(subscriptionStateChanged(Tp::Contact::PresenceState)),
+            &pause, SLOT(quit())
+            );
+    contact->requestPresenceSubscription();
+    pause.exec(); // wait for subscription state to change before continuing
+
+    addContactToModel(contact);
 }
 
 
@@ -402,23 +412,7 @@ void RosterModel::onKnownContactsChanged(Tp::Contacts contactsAdded,Tp::Contacts
 
     // add new contacts
     foreach (const Tp::ContactPtr &contact, contactsAdded) {
-
-        // if the contact is not blocked, and we neither subscribe to or publish presence for that contact, it has probably been removed and we don't want to see it in the roster
-        if (contact->publishState() == Tp::Contact::PresenceStateNo && contact->subscriptionState() == Tp::Contact::PresenceStateNo && !contact->isBlocked()) {
-            qDebug() << "Contact " << contact->id() << " will not be added to the roster because there is no presence subscription or publication";
-        } else {
-
-            bool exists = false;
-            RosterElement *item = createItemForContact(contact, exists);
-            if(exists) {
-                qDebug() << "Contact " << item->contactID() << " already exists";
-            } else {
-                qDebug() << "Adding contact " << item->contactID();
-                beginInsertRows(QModelIndex(), rowCount(), rowCount());
-                mList.append(item);
-                endInsertRows();
-            }
-        }
+        addContactToModel(contact);
     }
 
     // remove contacts by comparing contact IDs
