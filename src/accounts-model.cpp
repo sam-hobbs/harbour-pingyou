@@ -185,10 +185,10 @@ AccountsModel::AccountsModel(QObject *parent) {
 //                );
 
     mAM = Tp::AccountManager::create(
-                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile, Tp::Account::FeatureProtocolInfo
+                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore | Tp::Account::FeatureAvatar), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile, Tp::Account::FeatureProtocolInfo
                 Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups), // unused options: Tp::Connection::FeatureAccountBalance, Tp::Connection::FeatureCore, Tp::Connection::FeatureSelfContact, Tp::Connection::FeatureSimplePresence
                 Tp::ChannelFactory::create(QDBusConnection::sessionBus()),
-                Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence) // unused options: Tp::Contact::FeatureAddresses, Tp::Contact::FeatureAvatarData, Tp::Contact::FeatureAvatarToken, Tp::Contact::FeatureCapabilities, Tp::Contact::FeatureClientTypes, Tp::Contact::FeatureInfo, Tp::Contact::FeatureLocation, Tp::Contact::FeatureRosterGroups
+                Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence | Tp::Contact::FeatureAvatarData | Tp::Contact::FeatureAvatarToken) // unused options: Tp::Contact::FeatureAddresses, Tp::Contact::FeatureAvatarData, Tp::Contact::FeatureAvatarToken, Tp::Contact::FeatureCapabilities, Tp::Contact::FeatureClientTypes, Tp::Contact::FeatureInfo, Tp::Contact::FeatureLocation, Tp::Contact::FeatureRosterGroups
                 );
 
     connect(mAM->becomeReady(),

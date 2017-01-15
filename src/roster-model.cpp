@@ -24,6 +24,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Types>
 #include <TelepathyQt/Account>
 #include <TelepathyQt/Contact>
+//#include <TelepathyQt/ContactCapabilities>
 #include <TelepathyQt/ContactManager>
 #include <TelepathyQt/PendingConnection>
 #include <TelepathyQt/PendingContacts>
@@ -60,6 +61,16 @@ RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject
             SLOT(onContactChanged())
             );
 
+    connect(contact.data(),
+            SIGNAL(avatarTokenChanged(QString)),
+            SLOT(onAvatarTokenChanged(QString))
+            );
+
+    connect(contact.data(),
+            SIGNAL(avatarDataChanged(Tp::AvatarData)),
+            SLOT(onAvatarDataChanged(Tp::AvatarData))
+            );
+
     // connect signals
     connect(contact.data(),
             SIGNAL(publishStateChanged(Tp::Contact::PresenceState,QString)),
@@ -76,6 +87,8 @@ RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject
             SIGNAL(blockedChanged())
             );
 
+    mContact->requestAvatarData();
+
 }
 
 RosterElement::~RosterElement() {
@@ -84,32 +97,6 @@ RosterElement::~RosterElement() {
 
 
 void RosterElement::onContactChanged() {
-
-//    QString status = mContact->presence().status();
-
-//    // if I've asked to see the contact presence
-//    if (mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
-//        mStatus = status + " (awaiting approval)";
-//    }
-
-//    // if the contact asked to see my presence
-
-//    else if (mContact->publishState() == Tp::Contact::PresenceStateAsk) {
-//        mStatus = status + " (pending approval)";
-//    }
-
-//    else if (mContact->subscriptionState() == Tp::Contact::PresenceStateNo && mContact->publishState() == Tp::Contact::PresenceStateNo) {
-//        mStatus = status + " (unknown)";
-//    }
-
-//    else {
-//        mStatus = status;
-//    }
-
-//    // if the contact is blocked, override the status to blocked
-//    if (mContact->isBlocked()) {
-//        mStatus = status + " (blocked)";
-//    }
 
     mStatus = mContact->presence().status();
     emit statusChanged();
@@ -224,6 +211,46 @@ bool RosterElement::canRequestPresenceSubscription() const {
 
 bool RosterElement::canRescindPresenceSubscriptionRequest() const {
     return mContact->manager()->canRescindPresenceSubscriptionRequest();
+}
+
+QString RosterElement::avatarPath() const {
+
+    if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarData)) {
+
+        if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarToken)) {
+            if ( mContact->isAvatarTokenKnown() ) {
+                qDebug() << mContact->id() << ": avatar and avatar token features are supported, token is " << mContact->avatarToken() << ", path is " << mContact->avatarData().fileName;
+            } else {
+                qDebug() << mContact->id() << ": avatar and avatar token features are supported, path is " << mContact->avatarData().fileName;
+            }
+        } else {
+            qDebug() << mContact->id() << ": avatar feature is supported, path is " << mContact->avatarData().fileName;
+        }
+        return mContact->avatarData().fileName;
+    } else {
+        qDebug() << mContact->id() << ": avatar is not available";
+        return QString("");
+    }
+}
+
+void RosterElement::onAvatarTokenChanged(QString avatarToken) {
+    qDebug() << mContact->id() << ": onAvatarTokenChanged called";
+    if (mAvatarToken != avatarToken) {
+        qDebug() << "avatar token changed, emitting avatarPathChanged";
+        mAvatarToken = avatarToken;
+        emit avatarPathChanged(avatarPath());
+    } else {
+        qDebug() << "avatar token has not changed, doing nothing";
+    }
+}
+
+void RosterElement::onAvatarDataChanged(Tp::AvatarData data) {
+    qDebug() << mContact->id() << ": onAvatarDataChanged called";
+    if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarToken)) {
+        qDebug() << "not changing avatar path because tokens are supported";
+    } else {
+        emit avatarPathChanged(data.fileName);
+    }
 }
 
 // =============================================================

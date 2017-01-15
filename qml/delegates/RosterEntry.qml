@@ -43,6 +43,16 @@ BackgroundItem {
                 horizontalAlignment: Text.AlignHCenter
             }
 
+            Image {
+                id: avatarImage
+                height: (avatarImage.status === Image.Ready) ? width : 0
+                asynchronous: true // don't block the UI while the image is loaded
+                fillMode: Image.PreserveAspectFit
+                source: contact.avatarPath
+                width: parent.width/2
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
             DetailItem {
                 id: statusDetail
                 label: "Status"
@@ -70,35 +80,35 @@ BackgroundItem {
 
 
 
-            DetailItem {
-                id: canAuthorisePub
-                label: "Can authorise publication"
-                value: contact.canAuthorisePublication
-            }
+//            DetailItem {
+//                id: canAuthorisePub
+//                label: "Can authorise publication"
+//                value: contact.canAuthorisePublication
+//            }
 
-            DetailItem {
-                id: canRemovePub
-                label: "Can remove publication"
-                value: contact.canRemovePublication
-            }
+//            DetailItem {
+//                id: canRemovePub
+//                label: "Can remove publication"
+//                value: contact.canRemovePublication
+//            }
 
-            DetailItem {
-                id: canBlock
-                label: "Can block contacts"
-                value: contact.blocked
-            }
+//            DetailItem {
+//                id: canBlock
+//                label: "Can block contacts"
+//                value: contact.blocked
+//            }
 
-            DetailItem {
-                id: canRequestSub
-                label: "Can request subscription"
-                value: contact.canRequestPresenceSubscription
-            }
+//            DetailItem {
+//                id: canRequestSub
+//                label: "Can request subscription"
+//                value: contact.canRequestPresenceSubscription
+//            }
 
-            DetailItem {
-                id: canRescindSubRequest
-                label: "Can rescind subscription request"
-                value: contact.canRescindPresenceSubscriptionRequest
-            }
+//            DetailItem {
+//                id: canRescindSubRequest
+//                label: "Can rescind subscription request"
+//                value: contact.canRescindPresenceSubscriptionRequest
+//            }
         }
 
         // TODO: add contact avatar?

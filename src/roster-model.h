@@ -49,6 +49,8 @@ class RosterElement : public QObject
     Q_PROPERTY(QString subscriptionState READ subscriptionState NOTIFY subscriptionStateChanged)
     Q_PROPERTY(bool blocked READ blocked NOTIFY blockedChanged)
 
+    Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged)
+
     // these properties hold information about the capabilities of the contact manager, used to decide which actions are enabled
     Q_PROPERTY(bool canAuthorisePublication READ canAuthorisePublication CONSTANT)
     Q_PROPERTY(bool canRemovePublication READ canRemovePublication CONSTANT)
@@ -77,6 +79,8 @@ public:
     bool canRequestPresenceSubscription() const;
     bool canRescindPresenceSubscriptionRequest() const;
 
+    QString avatarPath() const;
+
     Q_INVOKABLE void authPubAction(); // authorise presence publication
     Q_INVOKABLE void denyPubAction(); // deny presence publication
     Q_INVOKABLE void removePubAction(); // remove presence publication and subscription
@@ -92,12 +96,17 @@ signals:
     void subscriptionStateChanged();
     void blockedChanged();
 
+    void avatarPathChanged(QString);
+
 private Q_SLOTS:
     void onContactChanged();
+    void onAvatarTokenChanged(QString);
+    void onAvatarDataChanged(Tp::AvatarData);
 
-private:
+private:   
     Tp::ContactPtr mContact;
     QString mStatus;
+    QString mAvatarToken;
 };
 
 
