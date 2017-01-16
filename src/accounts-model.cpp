@@ -39,6 +39,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QDebug>
 #include <TelepathyQt/AvatarData>
 #include <TelepathyQt/AvatarSpec>
+#include <TelepathyQt/AccountSet>
 
 AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc) {
 
@@ -233,15 +234,10 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
 
     qDebug() << "onAMReady called";
 
-    // add each account item to the model
-    foreach (const Tp::AccountPtr &acc, mAM->allAccounts()) {
-        // only add jabber accounts
-        if ( QString::compare(acc->protocolName(), "jabber", Qt::CaseSensitive) == 0 ) {
-            //qDebug() << "Adding account " << acc->displayName() << " from onAMReady";
-            addAccountElement(acc);
-        } else {
-            qDebug() << "Skipped account with display name " << acc->displayName() << " because it is of type " << acc->protocolName();
-        }
+    // query for jabber accounts only. mAM->allAccounts() returns telephony accounts too, which we don't want
+    foreach(const Tp::AccountPtr &acc, mAM->accountsByProtocol(QString("jabber"))->accounts() ) {
+        qDebug() << "Adding account " << acc->displayName();
+        addAccountElement(acc);
     }
 
     // if number of valid accounts is 1 or more, emit signal with account pointer so that the rosterModel can update its data
