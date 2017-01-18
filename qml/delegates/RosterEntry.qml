@@ -154,5 +154,21 @@ BackgroundItem {
 
         }
 
+        // shade the items so that it is easy to distinguish beteween contacts in the roster
+        Item {
+            anchors.fill: parent
+
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: parent.height
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.rgba(Theme.primaryColor, 0) }
+                    GradientStop { position: 1.0; color: Theme.rgba(Theme.primaryColor, 0.1) }
+                }
+            }
+        }
+
     }
 }

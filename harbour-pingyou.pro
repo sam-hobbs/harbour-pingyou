@@ -26,6 +26,7 @@ SOURCES +=  src/harbour-pingyou.cpp \
 HEADERS += \
     src/accounts-model.h \
     src/roster-model.h
+    #src/account-properties-dialog-data.h
 
 
 OTHER_FILES += \
@@ -58,5 +59,6 @@ DISTFILES += \
     qml/delegates/AccountEntry.qml \
     qml/pages/RosterPage.qml \
     qml/delegates/RosterEntry.qml \
-    qml/dialogs/AddContactDialog.qml
+    qml/dialogs/AddContactDialog.qml \
+    qml/dialogs/AccountPropertiesDialog.qml
 

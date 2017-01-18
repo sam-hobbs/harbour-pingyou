@@ -21,43 +21,40 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 
 */
 
-import QtQuick 2.2
+import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-import "../delegates"
+// https://stackoverflow.com/questions/17017365/use-a-qlistqvariantmap-as-a-model-for-a-qml-listview#17146819
 
-Page {
-    id: page
-    allowedOrientations: Orientation.All
+Dialog {
+
+    //canAccept: jabberIDField.acceptableInput
+
+    property variant parameterModel // set when dialog is opened
 
     SilicaListView {
 
-        PullDownMenu {
+        DialogHeader {}
 
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: console.log("Settings clicked")
-            }
+        id: list_view
 
-            MenuItem {
-                text: qsTr("Roster")
-                onClicked: pageStack.push(Qt.resolvedUrl("RosterPage.qml"))
-                visible: (accountsModel.numValidAccounts > 0)
-            }
-        }
-
-        id: listView
         anchors.fill: parent
-        width: parent.width
-        header: PageHeader {
-            title: "Accounts"
-        }
-
-        model: accountsModel
-        delegate: AccountEntry {}
-
-        VerticalScrollDecorator {}
-
+        model: parameterModel
+        // modelData holds the data with the same role name
+        // model is the model
+        // index is the index of the current item
+        delegate:
+                Label {
+                    text: model.account
+                }
     }
 
+
+
+    onDone: {
+        if (result == DialogResult.Accepted) {
+            //rosterModel.addContact(jabberIDField.text)
+            console.log("accepted")
+        }
+    }
 }

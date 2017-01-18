@@ -61,6 +61,8 @@ public:
 
     Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged) //TODO
 
+    Q_PROPERTY(QVariant parameterList READ parameterList NOTIFY parameterListChanged)
+
     AccountElement (Tp::AccountPtr acc, QObject *parent = 0);
 
 
@@ -80,11 +82,17 @@ public:
 
     bool online() const;
 
+    QVariant parameterList() const;
+
     QString avatarPath() const;
 
     Tp::AccountPtr getAccountPtr();
 
     Q_INVOKABLE void setActiveAccount();
+
+    Q_INVOKABLE void remove();
+
+    Q_INVOKABLE void toggleEnabled();
 
 signals:
     void validChanged(bool);
@@ -110,9 +118,16 @@ signals:
 
     void setThisAccountActive(Tp::AccountPtr);
 
+    void parameterListChanged();
+
+    void deleteMe(AccountElement *);
+
 public slots:
 
     void avatarChanged(Tp::Avatar) const;
+
+private Q_SLOTS:
+    void accountRemovalResultHandler(Tp::PendingOperation*);
 
 private:
     Tp::AccountPtr mAcc;
@@ -120,7 +135,7 @@ private:
 
 
 
-
+// ==========================================================================
 
 
 class AccountsModel : public QAbstractListModel
@@ -144,11 +159,10 @@ public:
     Q_ENUMS(Columns)
 
     bool numValidAccounts() const;
-    //Tp::AccountPtr returnFirstValidAccountPtr() const;
 
 signals:
     void newAccountPtr(Tp::AccountPtr);
-    void numValidAccountsChanged(bool);
+    void numValidAccountsChanged();
 
 protected:
     QHash<int, QByteArray> roleNames() const; // exposes role names so they can be accessed via QML
@@ -156,6 +170,7 @@ protected:
 private Q_SLOTS:
     void onAMReady(Tp::PendingOperation *);
     void addAccountElement(const Tp::AccountPtr &);
+    void removeAccount(AccountElement *);
 
 private:
     Tp::AccountManagerPtr mAM;

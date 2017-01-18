@@ -27,6 +27,14 @@ import Sailfish.Silica 1.0
 BackgroundItem {
     id: delegate
     height: itemId.height + 10
+
+    RemorseItem { id: remorse }
+
+    function showRemorseItem() {
+        var idx = index
+        remorse.execute(delegate, "Deleting", function() {account.remove()})
+    }
+
     ListItem {
         id: itemId
         width: parent.width
@@ -43,7 +51,27 @@ BackgroundItem {
             }
 
             MenuItem {
-                text: qsTr("Foo")
+                text: qsTr("Account Settings")
+                onClicked: {
+                    console.log("Loading parameters page for " + account.displayName)
+                    pageStack.push(Qt.resolvedUrl("../dialogs/AccountPropertiesDialog.qml"),{parameterModel: account.parameterList},PageStackAction.Immediate)
+                }
+            }
+
+            MenuItem {
+                text: account.enabled ? qsTr("Disable") : qsTr("Enable")
+                onClicked: {
+                    console.log("Toggling enabled state for " + account.displayName)
+                    account.toggleEnabled();
+                }
+            }
+
+            MenuItem {
+                text: qsTr("Remove account")
+                onClicked: {
+                    console.log("Removing account " + account.displayName)
+                    delegate.showRemorseItem()
+                }
             }
         }
 
@@ -143,6 +171,22 @@ BackgroundItem {
                     value: account.connectionPath
                 }
 
+            }
+        }
+
+        // shade the items so that it is easy to distinguish beteween accounts
+        Item {
+            anchors.fill: parent
+
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: parent.height
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.rgba(Theme.primaryColor, 0) }
+                    GradientStop { position: 1.0; color: Theme.rgba(Theme.primaryColor, 0.1) }
+                }
             }
         }
 

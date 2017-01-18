@@ -40,6 +40,8 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/AvatarData>
 #include <TelepathyQt/AvatarSpec>
 #include <TelepathyQt/AccountSet>
+#include <TelepathyQt/Profile>
+#include <TelepathyQt/ProtocolInfo>
 
 AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc) {
 
@@ -174,6 +176,49 @@ void AccountElement::setActiveAccount() {
 }
 
 
+QVariant AccountElement::parameterList() const {
+    qDebug() << "listing account parameters";
+    qDebug() << mAcc->parameters();
+    qDebug();
+
+    qDebug() << "listing protocol parameters";
+    //mAcc->protocolInfo().parameters(); // ProtocolParameterList
+    foreach (Tp::ProtocolParameter parameter, mAcc->protocolInfo().parameters()) {
+        qDebug() << "parameter name: " << parameter.name() << ", default value: " << parameter.defaultValue() << ", required: " << parameter.isRequired() << ", required for registration: " << parameter.isRequiredForRegistration();
+    }
+    qDebug();
+
+    qDebug() << "listing account profile parameters";
+    foreach (Tp::Profile::Parameter parameter, mAcc->profile()->parameters()) { //ParameterList
+        qDebug() << "name: " << parameter.name() << ", value : " << parameter.value() << ", mandatory is: " << parameter.isMandatory();
+    }
+
+    return QVariant::fromValue(mAcc->parameters());
+}
+
+
+void AccountElement::remove() {
+
+    // "mAcc->remove()" will delete the account object and the account pointer will become invalid. need to check the result of the deletion. If successful, trigger removal of this AccountElement from the model
+    connect(mAcc->remove(), SIGNAL(finished(Tp::PendingOperation*)),
+            SLOT(accountRemovalResultHandler(Tp::PendingOperation*))
+            );
+}
+
+void AccountElement::accountRemovalResultHandler(Tp::PendingOperation * op) {
+    if ( op->isError() ) {
+        qWarning() << "Error deleting account object: " << op->errorName() << ", " << op->errorMessage();
+    } else {
+        qDebug() << "Asking account model to delet this object";
+        emit deleteMe(this);
+    }
+}
+
+void AccountElement::toggleEnabled() {
+    mAcc->setEnabled(!mAcc->isEnabled());
+    // TODO: connect pending operation to a generic error handling slot
+}
+
 // ==========================================================
 
 
@@ -186,7 +231,7 @@ AccountsModel::AccountsModel(QObject *parent) {
 //                );
 
     mAM = Tp::AccountManager::create(
-                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore | Tp::Account::FeatureAvatar), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile, Tp::Account::FeatureProtocolInfo
+                Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore | Tp::Account::FeatureAvatar | Tp::Account::FeatureProfile), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile used to list parameters, Tp::Account::FeatureProtocolInfo
                 Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups), // unused options: Tp::Connection::FeatureAccountBalance, Tp::Connection::FeatureCore, Tp::Connection::FeatureSelfContact, Tp::Connection::FeatureSimplePresence
                 Tp::ChannelFactory::create(QDBusConnection::sessionBus()),
                 Tp::ContactFactory::create(Tp::Contact::FeatureAlias | Tp::Contact::FeatureSimplePresence | Tp::Contact::FeatureAvatarData | Tp::Contact::FeatureAvatarToken) // unused options: Tp::Contact::FeatureAddresses, Tp::Contact::FeatureAvatarData, Tp::Contact::FeatureAvatarToken, Tp::Contact::FeatureCapabilities, Tp::Contact::FeatureClientTypes, Tp::Contact::FeatureInfo, Tp::Contact::FeatureLocation, Tp::Contact::FeatureRosterGroups
@@ -257,13 +302,30 @@ void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-    myList.append(new AccountElement(acc));
-    //myList.append(acc);
-    endInsertRows();
+    AccountElement * newAccount = new AccountElement(acc);
+
+    // connect signals and slots to allow the element to delete itself from the model
+    connect(newAccount, SIGNAL(deleteMe(AccountElement*)),
+            SLOT(removeAccount(AccountElement*))
+            );
 
     // when the new AccountElement requests that it become the active account in the rosterModel, pass on the signal
-    connect(myList.last(),SIGNAL(setThisAccountActive(Tp::AccountPtr)),
+    connect(newAccount,SIGNAL(setThisAccountActive(Tp::AccountPtr)),
             SIGNAL(newAccountPtr(Tp::AccountPtr)));
+
+    // update numValidAccounts when valid or enabled properties change
+    connect(newAccount,SIGNAL(enabledChanged(bool)),
+            SIGNAL(numValidAccountsChanged())
+            );
+    connect(newAccount,SIGNAL(validChanged(bool)),
+            SIGNAL(numValidAccountsChanged())
+            );
+
+    myList.append(newAccount);
+
+    endInsertRows();
+
+    emit numValidAccountsChanged();
 }
 
 
@@ -271,18 +333,32 @@ bool AccountsModel::numValidAccounts() const {
 
     int numValid = 0;
 
-    //qDebug() << "counting valid accounts";
-
     // loop through the list of AccountElement objects and if the element is valid and enabled, add it to the count
     foreach (AccountElement * account, myList) {
         if (account->valid() && account->enabled()) {
-            //qDebug() << "valid and enabled account found";
             numValid++;
-        } else {
-            //qDebug() << "account not valid";
         }
     }
 
-    qDebug() << "final count of valid accounts is: " << numValid;
+    qDebug() << "number of valid accounts is: " << numValid;
     return numValid;
+}
+
+void AccountsModel::removeAccount(AccountElement * account) {
+    qDebug() << "removeAccount called";
+
+    // find the account to be deleted in the list, and remove + delete it
+    for ( int i=0; i< myList.count(); ++i ) {
+        if (myList[i] == account) {
+            qDebug() << "Item " << i << " matches the account to be removed. Removing from list and deleting";
+            beginRemoveRows(QModelIndex(),i,i);
+            AccountElement * item = myList.takeAt(i);
+            endRemoveRows();
+            delete item;
+            emit numValidAccountsChanged();
+        } else {
+            qDebug() << "Item " << i << "does not match the account to be removed";
+        }
+    }
+
 }
