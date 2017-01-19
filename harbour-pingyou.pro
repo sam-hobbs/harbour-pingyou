@@ -20,12 +20,14 @@ QT += quick qml dbus
 
 SOURCES +=  src/harbour-pingyou.cpp \
     src/accounts-model.cpp \
-    src/roster-model.cpp
+    src/roster-model.cpp \
+    src/pingyou-settings.cpp
 
 
 HEADERS += \
     src/accounts-model.h \
-    src/roster-model.h
+    src/roster-model.h \
+    src/pingyou-settings.h
     #src/account-properties-dialog-data.h
 
 
@@ -60,5 +62,6 @@ DISTFILES += \
     qml/pages/RosterPage.qml \
     qml/delegates/RosterEntry.qml \
     qml/dialogs/AddContactDialog.qml \
-    qml/dialogs/AccountPropertiesDialog.qml
+    qml/dialogs/AccountPropertiesDialog.qml \
+    qml/pages/SettingsPage.qml
 

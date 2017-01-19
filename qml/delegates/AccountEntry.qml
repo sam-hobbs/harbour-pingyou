@@ -79,8 +79,9 @@ BackgroundItem {
 
         ExpandingSection {
             id: expanding
-            title: (account.valid && account.enabled) ? account.displayName + " (enabled)" : account.displayName + " (disabled)"
+            title: (account.valid && account.enabled) ? account.nickname + " (enabled)" : account.nickname + " (disabled)"
             expanded: (account.valid && account.enabled)
+            //height: column.height
             content.sourceComponent:
 
             Column {
@@ -89,6 +90,7 @@ BackgroundItem {
                 width: parent.width
                 anchors.leftMargin: Theme.paddingLarge
                 anchors.rightMargin: Theme.paddingLarge
+                //height: avatarImage.height + nicknameDetail.height + currentPresenceDetail.height + devInfo.height
 
                 Image {
                     id: avatarImage
@@ -103,48 +105,49 @@ BackgroundItem {
                     id: validDetail
                     label: "Valid"
                     value: account.valid ? "true" : "false"
+                    //visible: settings.displayDevInfo
                 }
 
                 DetailItem {
                     id: enabledDetail
                     label: "Enabled"
                     value: account.enabled ? "true" : "false"
+                    //visible: settings.displayDevInfo
                 }
 
                 DetailItem {
-                    id: connectionManagerDetail
-                    label: "Connection Manager"
-                    value: account.cmName
-                }
-
-                DetailItem {
-                    id: protocolDetail
-                    label: "Protocol Name"
-                    value: account.protocolName
+                    id: displayNameDetail
+                    label: "Display name"
+                    value: account.displayName
+                    visible: (settings.displayDevInfo || (account.displayName !== account.nickname))
                 }
 
                 DetailItem {
                     id: nicknameDetail
                     label: "Nickname"
                     value: account.nickname
+                    visible: settings.displayDevInfo
+                }
+
+                DetailItem {
+                    id: connectionManagerDetail
+                    label: "Connection Manager"
+                    value: account.cmName
+                    visible: settings.displayDevInfo
+                }
+
+                DetailItem {
+                    id: protocolDetail
+                    label: "Protocol Name"
+                    value: account.protocolName
+                    visible: settings.displayDevInfo
                 }
 
                 DetailItem {
                     id: connectsAutomaticallyDetail
                     label: "Connects Automatically"
                     value: account.connectsAutomatically ? "true" : "false"
-                }
-
-                DetailItem {
-                    id: changingPresenceDetail
-                    label: "Changing Presence"
-                    value: account.changingPresence ? "true" : "false"
-                }
-
-                DetailItem {
-                    id: automaticPresenceDetail
-                    label: "Automatic Presence"
-                    value: account.automaticPresence
+                    visible: settings.displayDevInfo
                 }
 
                 DetailItem {
@@ -154,21 +157,38 @@ BackgroundItem {
                 }
 
                 DetailItem {
+                    id: changingPresenceDetail
+                    label: "Changing Presence"
+                    value: account.changingPresence ? "true" : "false"
+                    visible: settings.displayDevInfo
+                }
+
+                DetailItem {
+                    id: automaticPresenceDetail
+                    label: "Automatic Presence"
+                    value: account.automaticPresence
+                    visible: settings.displayDevInfo
+                }
+
+                DetailItem {
                     id: requestedPresenceDetail
                     label: "Requested Presence"
                     value: account.requestedPresence
+                    visible: settings.displayDevInfo
                 }
 
                 DetailItem {
                     id: connectionStatusDetail
                     label: "Connection Status"
                     value: account.connectionStatus
+                    visible: settings.displayDevInfo
                 }
 
                 DetailItem {
                     id: connectionDetail
                     label: "Connection Path"
                     value: account.connectionPath
+                    visible: settings.displayDevInfo
                 }
 
             }

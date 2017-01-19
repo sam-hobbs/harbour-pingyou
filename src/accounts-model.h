@@ -48,7 +48,7 @@ public:
     Q_PROPERTY(QString cmName READ cmName CONSTANT) // not notifiable
     Q_PROPERTY(QString protocolName READ protocolName CONSTANT) // not notifiable
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged)
-    Q_PROPERTY(QString nickname READ enabled NOTIFY nicknameChanged)
+    Q_PROPERTY(QString nickname READ nickname NOTIFY nicknameChanged)
     Q_PROPERTY(bool connectsAutomatically READ connectsAutomatically NOTIFY connectsAutomaticallyChanged)
     Q_PROPERTY(bool changingPresence READ changingPresence NOTIFY changingPresenceChanged)
     Q_PROPERTY(QString automaticPresence READ automaticPresence NOTIFY automaticPresenceChanged)

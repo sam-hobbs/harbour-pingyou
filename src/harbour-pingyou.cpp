@@ -36,6 +36,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 
 #include "accounts-model.h"
 #include "roster-model.h"
+#include "pingyou-settings.h"
 
 int main(int argc, char *argv[])
 {   
@@ -53,15 +54,10 @@ int main(int argc, char *argv[])
     AccountsModel *accountsModel = new AccountsModel();
     RosterModel *rosterModel = new RosterModel();
 
-    // register types with qml engine
-    //qmlRegisterType<Tp::Account>();
-    //qmlRegisterType<Tp::Account>("harbour.pingyou",1,0,"Account"); // gives error "no matching function for call to Tp::Account::Account()" because account object has no default constructor (required for qml to initialise object)
-    //qmlRegisterExtendedType<Tp::Account>();
-    //qRegisterMetaType<Tp::Account>("Tp::Account");
-
-    //qmlRegisterType<Tp::Connection>();
-    //qmlRegisterType<Tp::Presence>(); // gives error "staticMetaObject is not a member of Tp::Presence" because Q_OBJECT macro is not defined in the class
-    //qmlRegisterType<Tp::ConnectionStatus>(); // gives error "staticMetaObject is not a member of Tp::ConnectionStatus" because Q_OBJECT macro is not defined in the class
+    // register settings object with qml engine and expose it
+    qmlRegisterType<PingYouSettings>("harbour.pingyou.settings", 0, 1, "PingYouSettings");
+    PingYouSettings * settings = new PingYouSettings();
+    view->rootContext()->setContextProperty("settings",settings);
 
     // expose the accountsModel data model to qml https://doc.qt.io/qt-4.8/qdeclarativemodels.html
     view->rootContext()->setContextProperty("accountsModel", accountsModel);

@@ -209,7 +209,7 @@ void AccountElement::accountRemovalResultHandler(Tp::PendingOperation * op) {
     if ( op->isError() ) {
         qWarning() << "Error deleting account object: " << op->errorName() << ", " << op->errorMessage();
     } else {
-        qDebug() << "Asking account model to delet this object";
+        qDebug() << "Asking account model to delete this object";
         emit deleteMe(this);
     }
 }

@@ -36,7 +36,7 @@ Page {
 
             MenuItem {
                 text: qsTr("Settings")
-                onClicked: console.log("Settings clicked")
+                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
             }
 
             MenuItem {
