@@ -29,7 +29,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QObject>
 #include <QAbstractListModel>
 #include <TelepathyQt/AvatarData>
-
+#include <QTemporaryFile>
 
 namespace Tp {
 class AccountManager;
@@ -124,13 +124,14 @@ signals:
 
 public slots:
 
-    void avatarChanged(Tp::Avatar) const;
+    void avatarChanged(Tp::Avatar);
 
 private Q_SLOTS:
     void accountRemovalResultHandler(Tp::PendingOperation*);
 
 private:
     Tp::AccountPtr mAcc;
+    QTemporaryFile *mAvatarFile;
 };
 
 

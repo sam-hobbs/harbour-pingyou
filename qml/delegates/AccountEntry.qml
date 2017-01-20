@@ -92,13 +92,15 @@ BackgroundItem {
                 anchors.rightMargin: Theme.paddingLarge
                 //height: avatarImage.height + nicknameDetail.height + currentPresenceDetail.height + devInfo.height
 
-                Image {
+                Image {                    
                     id: avatarImage
-                    width: parent.width
+                    height: (avatarImage.status === Image.Ready) ? width : 0
                     asynchronous: true // don't block the UI while the image is loaded
                     fillMode: Image.PreserveAspectFit
                     source: account.avatarPath
-
+                    width: parent.width/2
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    //cache: false
                 }
 
                 DetailItem {

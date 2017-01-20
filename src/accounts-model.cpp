@@ -43,7 +43,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Profile>
 #include <TelepathyQt/ProtocolInfo>
 
-AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc) {
+AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc), mAvatarFile(new QTemporaryFile(this)) {
 
     // bind signals
     connect(mAcc.data(), SIGNAL(validityChanged(bool)),
@@ -88,7 +88,7 @@ AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(pa
     connect(mAcc.data(), SIGNAL(avatarChanged(Tp::Avatar)),
             this, SLOT(avatarChanged(Tp::Avatar)));
 
-
+    avatarChanged(mAcc->avatar());
 }
 
 
@@ -151,19 +151,24 @@ bool AccountElement::online() const {
 }
 
 QString AccountElement::avatarPath() const {
-    // TODO avatar() returns Tp::Avatar which is a bytearray but we want Tp::AvatarData
-    //Tp::AvatarData avatar = mAcc->avatar();
-    //qDebug() << "filename is " << avatar.fileName;
-    //return avatar.fileName;
-    //qDebug() << "mimetype is: " << mAcc->avatar.MIMEType; //Tp::Account::avatar does not have class type
-    return QString("/usr/share/icons/hicolor/256x256/apps/harbour-pingyou.png"); // TODO: CHANGEME - just for testing
+    // avatar() returns Tp::Avatar instead of Tp::AvatarData like the contact interface. Avatar data has been written to a temporary file using Tp::Avatar.avatarData, which returns a QByteArray
+    qDebug() << "avatarPath called, path is: " << mAvatarFile->fileName();
+    return mAvatarFile->fileName();
 }
 
-void AccountElement::avatarChanged(Tp::Avatar avatar) const {
-    Q_UNUSED(avatar);
-    //Tp::AvatarData av = avatar;
-    qDebug() << "avatar changed";
-    //emit avatarPathChanged(av.fileName);
+void AccountElement::avatarChanged(Tp::Avatar avatar) {
+    qDebug() << "avatar changed, writing to temporary file";
+
+    // QML Image element doesn't reload the image if the source filename doesn't change. Therefore, create a new temporary file (with a different path), swap it out and delete the old one
+    QTemporaryFile * oldAvatar = mAvatarFile;
+    mAvatarFile = new QTemporaryFile(this);
+    delete oldAvatar;
+
+    // write the new data to the temporary file
+    mAvatarFile->open();
+    mAvatarFile->write(avatar.avatarData);
+    mAvatarFile->close();
+    emit avatarPathChanged(mAvatarFile->fileName());
 }
 
 Tp::AccountPtr AccountElement::getAccountPtr() {
