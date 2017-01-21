@@ -3,7 +3,7 @@ Type=Application
 X-Nemo-Application-Type=silica-qt5
 Icon=harbour-pingyou
 Exec=harbour-pingyou
-Name=harbour-pingyou
+Name=PingYou
 # translation example:
 # your app name in German locale (de)
 #
