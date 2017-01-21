@@ -25,21 +25,23 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Label {
-        id: label
-        anchors.centerIn: parent
-        text: qsTr("My Cover")
+
+    Image {
+        id: coverIcon
+        source: (accountsModel.numValidAccounts > 0) ? "qrc:///tux" : "qrc:///tux-sleeping"
+        fillMode: Image.PreserveAspectFit
+        cache: true
+        //anchors.centerIn: parent
+        width: parent.width
+        x: Theme.paddingSmall
     }
 
     CoverActionList {
         id: coverAction
 
         CoverAction {
-            iconSource: "image://theme/icon-cover-next"
-        }
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
+            iconSource: "image://theme/icon-s-message"
+            onTriggered: console.log("cover action clicked")
         }
     }
 }

@@ -65,3 +65,6 @@ DISTFILES += \
     qml/dialogs/AccountPropertiesDialog.qml \
     qml/pages/SettingsPage.qml
 
+RESOURCES += \
+    harbour-pingyou.qrc
+

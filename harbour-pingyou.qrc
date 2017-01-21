@@ -1,0 +1,7 @@
+<RCC>
+    <qresource>
+        <file alias="tux">resources/tux.svg</file>
+        <file alias="tux-sleeping">resources/tux-sleeping.svg</file>
+	<file alias="tux-message">resources/tux-message.svg</file>
+    </qresource>
+</RCC>
