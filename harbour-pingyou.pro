@@ -27,7 +27,8 @@ SOURCES +=  src/harbour-pingyou.cpp \
 HEADERS += \
     src/accounts-model.h \
     src/roster-model.h \
-    src/pingyou-settings.h
+    src/pingyou-settings.h \
+    src/account-properties-dialog-data.h
     #src/account-properties-dialog-data.h
 
 

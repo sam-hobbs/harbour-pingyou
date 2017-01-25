@@ -41,6 +41,8 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject(parent), mContact(contact) {
     onContactChanged();
 
+    Q_ASSERT(!contact.isNull());
+
     // if the contact alias, presence, subscription state or block status change, update the object
     connect(contact.data(),
             SIGNAL(aliasChanged(QString)),
@@ -99,12 +101,17 @@ RosterElement::~RosterElement() {
 
 void RosterElement::onContactChanged() {
 
+    Q_ASSERT(!mContact.isNull());
+
     mStatus = mContact->presence().status();
     emit statusChanged();
 
 }
 
 QString RosterElement::contactID() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->id();
 }
 
@@ -114,18 +121,27 @@ QString RosterElement::status() const {
 
 void RosterElement::authPubAction() {
     qDebug() << "Auth pub action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if (mContact->publishState() != Tp::Contact::PresenceStateYes )
         mContact->authorizePresencePublication();
 }
 
 void RosterElement::denyPubAction() {
     qDebug() << "Deny pub action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if (mContact->publishState() != Tp::Contact::PresenceStateNo)
         mContact->removePresencePublication();
 }
 
 void RosterElement::removePubAction() {
     qDebug() << "Remove pub action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if(mContact->subscriptionState() != Tp::Contact::PresenceStateNo) {
         mContact->removePresencePublication();
         mContact->removePresenceSubscription();
@@ -134,6 +150,9 @@ void RosterElement::removePubAction() {
 
 void RosterElement::toggleBlockAction() {
     qDebug() << "toggle block action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if(mContact->isBlocked()) {
         qDebug() << "Unblocking contact";
         mContact->unblock();
@@ -145,6 +164,9 @@ void RosterElement::toggleBlockAction() {
 
 void RosterElement::requestSubAction() {
     qDebug() << "request sub action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if(mContact->subscriptionState() == Tp::Contact::PresenceStateNo) {
         mContact->requestPresenceSubscription();
     }
@@ -153,6 +175,9 @@ void RosterElement::requestSubAction() {
 
 void RosterElement::rescindSubRequestAction() {
     qDebug() << "rescind sub request action triggered";
+
+    Q_ASSERT(!mContact.isNull());
+
     if(mContact->subscriptionState() == Tp::Contact::PresenceStateAsk) {
         mContact->removePresenceSubscription();
     }
@@ -164,6 +189,8 @@ void RosterElement::rescindSubRequestAction() {
 
 
 QString RosterElement::publishState() const {
+
+    Q_ASSERT(!mContact.isNull());
 
     if (mContact->publishState() == Tp::Contact::PresenceStateYes) {
         return QString("yes");
@@ -178,6 +205,8 @@ QString RosterElement::publishState() const {
 
 QString RosterElement::subscriptionState() const {
 
+    Q_ASSERT(!mContact.isNull());
+
     if (mContact->subscriptionState() == Tp::Contact::PresenceStateYes) {
         return QString("yes");
     } else if (mContact->subscriptionState() == Tp::Contact::PresenceStateNo) {
@@ -190,31 +219,51 @@ QString RosterElement::subscriptionState() const {
 }
 
 bool RosterElement::blocked() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->isBlocked();
 }
 
 
 bool RosterElement::canAuthorisePublication() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->manager()->canAuthorizePresencePublication();
 }
 
 bool RosterElement::canRemovePublication() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->manager()->canRemovePresencePublication();
 }
 
 bool RosterElement::canBlockContacts() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->manager()->canBlockContacts();
 }
 
 bool RosterElement::canRequestPresenceSubscription() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->manager()->canRequestPresenceSubscription();
 }
 
 bool RosterElement::canRescindPresenceSubscriptionRequest() const {
+
+    Q_ASSERT(!mContact.isNull());
+
     return mContact->manager()->canRescindPresenceSubscriptionRequest();
 }
 
 QString RosterElement::avatarPath() const {
+
+    Q_ASSERT(!mContact.isNull());
 
     if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarData)) {
 
@@ -235,6 +284,9 @@ QString RosterElement::avatarPath() const {
 }
 
 void RosterElement::onAvatarTokenChanged(QString avatarToken) {
+
+    Q_ASSERT(!mContact.isNull());
+
     qDebug() << mContact->id() << ": onAvatarTokenChanged called";
     if (mAvatarToken != avatarToken) {
         qDebug() << "avatar token changed, emitting avatarPathChanged";
@@ -246,6 +298,9 @@ void RosterElement::onAvatarTokenChanged(QString avatarToken) {
 }
 
 void RosterElement::onAvatarDataChanged(Tp::AvatarData data) {
+
+    Q_ASSERT(!mContact.isNull());
+
     qDebug() << mContact->id() << ": onAvatarDataChanged called";
     if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarToken)) {
         qDebug() << "not changing avatar path because tokens are supported";
@@ -267,6 +322,8 @@ RosterModel::~RosterModel() {
 void RosterModel::setConnection(const Tp::ConnectionPtr &conn) {
 
     qDebug() << "setConnection called";
+
+    //Q_ASSERT(!mConn.isNull());
 
     // if connection already exists, clear the list of roster items
     if (mConn) {
@@ -306,6 +363,8 @@ void RosterModel::unsetConnection() {
         endRemoveRows();
         delete item;
     }
+
+    //Q_ASSERT(!mConn.isNull());
     mConn.reset();
 }
 
@@ -319,6 +378,9 @@ void RosterModel::onAccountConnectionChanged(const Tp::ConnectionPtr &conn) {
 }
 
 RosterElement * RosterModel::createItemForContact(const Tp::ContactPtr &contact, bool &exists) {
+
+    Q_ASSERT(!contact.isNull());
+
     RosterElement * item;
     exists = false;
     for (int i = 0; i < mList.count(); ++i) {
@@ -336,8 +398,9 @@ RosterElement * RosterModel::createItemForContact(const Tp::ContactPtr &contact,
 
 void RosterModel::onContactManagerStateChanged(Tp::ContactListState state) {
 
-    // check if the contact manager has received a contact list, and populate the model if it has
+    Q_ASSERT(!mConn.isNull());
 
+    // check if the contact manager has received a contact list, and populate the model if it has
     if (state == Tp::ContactListStateSuccess) {
         qDebug() << "Loading contacts";
         foreach (const Tp::ContactPtr &contact, mConn->contactManager()->allKnownContacts()) {
@@ -392,6 +455,9 @@ void RosterModel::onContactRetrieved(Tp::PendingOperation *op) {
 
 
 void RosterModel::setAccount(Tp::AccountPtr account) {
+
+    Q_ASSERT(!account.isNull());
+
     qDebug() << "roster model setAccount called, setting account to: " << account->displayName();
     mAccount = account;
 
@@ -438,10 +504,7 @@ void RosterModel::onKnownContactsChanged(Tp::Contacts contactsAdded,Tp::Contacts
 
 void RosterModel::addContactToModel(const Tp::ContactPtr &contact) {
 
-    if (!contact) {
-        qWarning() << "null pointer passed to addContactToModel function";
-        return;
-    }
+    Q_ASSERT(!contact.isNull());
 
     // if the contact is not blocked, and we neither subscribe to or publish presence for that contact, they have probably been removed and we don't want to see them in the roster
     if (contact->publishState() == Tp::Contact::PresenceStateNo && contact->subscriptionState() == Tp::Contact::PresenceStateNo && !contact->isBlocked()) {
@@ -464,6 +527,9 @@ void RosterModel::addContactToModel(const Tp::ContactPtr &contact) {
 
 void RosterModel::addContact(QString JID) {
     qDebug() << "Adding contact with Jabber ID: " << JID;
+
+    Q_ASSERT(!mConn.isNull());
+
     Tp::PendingContacts *pcontacts = mConn->contactManager()->contactsForIdentifiers(QStringList() << JID);
     connect(pcontacts,
             SIGNAL(finished(Tp::PendingOperation*)),

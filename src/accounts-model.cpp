@@ -42,8 +42,13 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/AccountSet>
 #include <TelepathyQt/Profile>
 #include <TelepathyQt/ProtocolInfo>
+#include <TelepathyQt/PendingAccount>
+
+//#include "account-properties-dialog-data.h"
 
 AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(parent), mAcc(acc), mAvatarFile(new QTemporaryFile(this)) {
+
+    Q_ASSERT(!mAcc.isNull());
 
     // bind signals
     connect(mAcc.data(), SIGNAL(validityChanged(bool)),
@@ -88,6 +93,12 @@ AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(pa
     connect(mAcc.data(), SIGNAL(avatarChanged(Tp::Avatar)),
             this, SLOT(avatarChanged(Tp::Avatar)));
 
+    connect(mAcc.data(), SIGNAL(normalizedNameChanged(QString)),
+            this, SIGNAL(normalisedNameChanged(QString)));
+
+    connect(mAcc.data(), SIGNAL(connectionStatusChanged(Tp::ConnectionStatus)),
+            this, SLOT(connectionStatusReasonChanged()));
+
     avatarChanged(mAcc->avatar());
 }
 
@@ -113,7 +124,7 @@ QString AccountElement::displayName() const {
 }
 
 QString AccountElement::nickname() const {
-    qDebug() << "nickname is: " << mAcc->nickname();
+    //qDebug() << "nickname is: " << mAcc->nickname();
     return mAcc->nickname();
     //return QString::fromUtf8(mAcc->nickname());
 }
@@ -142,12 +153,20 @@ Tp::ConnectionStatus AccountElement::connectionStatus() const {
     return mAcc->connectionStatus();
 }
 
+Tp::ConnectionStatusReason AccountElement::connectionStatusReason() const {
+    return mAcc->connectionStatusReason();
+}
+
 QString AccountElement::connectionPath() const {
     return mAcc->connection().isNull() ? QString("") : mAcc->connection()->objectPath();
 }
 
 bool AccountElement::online() const {
     return mAcc->isOnline();
+}
+
+QString AccountElement::normalisedName() const {
+    return mAcc->normalizedName();
 }
 
 QString AccountElement::avatarPath() const {
@@ -186,17 +205,17 @@ QVariant AccountElement::parameterList() const {
     qDebug() << mAcc->parameters();
     qDebug();
 
-    qDebug() << "listing protocol parameters";
-    //mAcc->protocolInfo().parameters(); // ProtocolParameterList
-    foreach (Tp::ProtocolParameter parameter, mAcc->protocolInfo().parameters()) {
-        qDebug() << "parameter name: " << parameter.name() << ", default value: " << parameter.defaultValue() << ", required: " << parameter.isRequired() << ", required for registration: " << parameter.isRequiredForRegistration();
-    }
-    qDebug();
+//    qDebug() << "listing protocol parameters";
+//    //mAcc->protocolInfo().parameters(); // ProtocolParameterList
+//    foreach (Tp::ProtocolParameter parameter, mAcc->protocolInfo().parameters()) {
+//        qDebug() << "parameter name: " << parameter.name() << ", default value: " << parameter.defaultValue() << ", required: " << parameter.isRequired() << ", required for registration: " << parameter.isRequiredForRegistration();
+//    }
+//    qDebug();
 
-    qDebug() << "listing account profile parameters";
-    foreach (Tp::Profile::Parameter parameter, mAcc->profile()->parameters()) { //ParameterList
-        qDebug() << "name: " << parameter.name() << ", value : " << parameter.value() << ", mandatory is: " << parameter.isMandatory();
-    }
+//    qDebug() << "listing account profile parameters";
+//    foreach (Tp::Profile::Parameter parameter, mAcc->profile()->parameters()) { //ParameterList
+//        qDebug() << "name: " << parameter.name() << ", value : " << parameter.value() << ", mandatory is: " << parameter.isMandatory();
+//    }
 
     return QVariant::fromValue(mAcc->parameters());
 }
@@ -222,6 +241,24 @@ void AccountElement::accountRemovalResultHandler(Tp::PendingOperation * op) {
 void AccountElement::toggleEnabled() {
     mAcc->setEnabled(!mAcc->isEnabled());
     // TODO: connect pending operation to a generic error handling slot
+}
+
+
+void AccountElement::setConnectsAutomatically(bool setting) {
+
+    // check that we are setting something different to the current value
+    if (setting != connectsAutomatically())
+        mAcc->setConnectsAutomatically(setting);
+
+    // TODO: connect pending operation to a generic error handling slot
+}
+
+void AccountElement::reconnect() {
+    qDebug() << "Reconnect called";
+    AccountsModel * accountsModel = dynamic_cast<AccountsModel *>(this->parent());
+    connect(mAcc->reconnect(),SIGNAL(finished(Tp::PendingOperation*)),
+            accountsModel,SLOT(genericErrorHandler(Tp::PendingOperation*))
+            );
 }
 
 // ==========================================================
@@ -307,7 +344,7 @@ void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-    AccountElement * newAccount = new AccountElement(acc);
+    AccountElement * newAccount = new AccountElement(acc,this);
 
     // connect signals and slots to allow the element to delete itself from the model
     connect(newAccount, SIGNAL(deleteMe(AccountElement*)),
@@ -366,4 +403,104 @@ void AccountsModel::removeAccount(AccountElement * account) {
         }
     }
 
+}
+
+
+///**
+// * Update this account parameters.
+// *
+// * On success, the PendingOperation returned by this method will produce a
+// * list of strings, which are the names of parameters whose changes will not
+// * take effect until the account is disconnected and reconnected (for instance
+// * by calling reconnect()).
+// *
+// * \param set Parameters to set.
+// * \param unset Parameters to unset.
+// * \return A PendingStringList which will emit PendingStringList::finished
+// *         when the request has been made
+// * \sa parametersChanged(), parameters(), reconnect()
+// */
+//PendingStringList *Account::updateParameters(const QVariantMap &set,
+//        const QStringList &unset)
+//{
+//    return new PendingStringList(
+//            baseInterface()->UpdateParameters(set, unset),
+//            AccountPtr(this));
+//}
+
+/**
+ * Create an account with the given parameters.
+ *
+ * The optional \a properties argument can be used to set any property listed in
+ * supportedAccountProperties() at the time the account is created.
+ *
+ * \param connectionManager The name of the connection manager to create the account
+ *                          for.
+ * \param protocol The name of the protocol to create the account for.
+ * \param displayName The account display name.
+ * \param parameters The account parameters.
+ * \param properties An optional map from fully qualified D-Bus property
+ *                   names such as "org.freedesktop.Telepathy.Account.Enabled"
+ *                   to their values.
+ * \return A PendingAccount object which will emit PendingAccount::finished
+ *         when the account has been created of failed its creation process.
+ * \sa supportedAccountProperties()
+ */
+
+//AccountManager::PendingAccount *createAccount(const QString &connectionManager,
+//            const QString &protocol, const QString &displayName,
+//            const QVariantMap &parameters,
+//const QVariantMap &properties = QVariantMap());
+
+void AccountsModel::createAccount(QVariantMap parameters) {
+    qDebug() << "Printing account properties from createAccount";
+    qDebug() << parameters;
+
+
+    parameters["keepalive-interval"]= QVariant(parameters.value("keepalive-interval").toUInt());
+    parameters["https-proxy-port"]= QVariant(parameters.value("https-proxy-port").toUInt());
+    parameters["priority"]= QVariant(parameters.value("priority").toInt());
+    parameters["fallback-socks5-proxies"]= QVariant(parameters.value("fallback-socks5-proxies").toStringList());
+    parameters["extra-certificate-identities"]= QVariant(parameters.value("extra-certificate-identities").toStringList());
+    parameters["fallback-servers"]= QVariant(parameters.value("fallback-servers").toStringList());
+    parameters["fallback-stun-port"]= QVariant(parameters.value("fallback-stun-port").toUInt());
+    parameters["port"]= QVariant(parameters.value("port").toUInt());
+    parameters["stun-port"]= QVariant(parameters.value("stun-port").toUInt());
+
+    qDebug() << "Printing account properties after fixing types";
+    qDebug() << parameters;
+
+    //qDebug() << QVariant::fromValue(properties);
+    Tp::PendingAccount * pendingAccount = mAM->createAccount("gabble",
+                       "jabber",
+                       "foo",
+                       parameters);
+
+
+//    connect(mAM.data(),
+//            SIGNAL(newAccount(const Tp::AccountPtr &)),
+//            SLOT(addAccountElement(const Tp::AccountPtr &))
+//            );
+
+    connect(pendingAccount, SIGNAL(finished(Tp::PendingOperation*)),
+            this, SLOT(onAccountCreationFinished(Tp::PendingOperation*))
+            );
+
+}
+
+void AccountsModel::onAccountCreationFinished(Tp::PendingOperation * op) {
+    if ( op->isError() ) {
+        qWarning() << "Error creating account: " << op->errorName() << ", " << op->errorMessage();
+    } else {
+        qDebug() << "Successfully created account";
+    }
+}
+
+void AccountsModel::genericErrorHandler(Tp::PendingOperation *op) {
+    qDebug() << "Generic error handler called";
+    if ( op->isError() ) {
+        qWarning() << "Error: " << op->errorName() << ", " << op->errorMessage();
+    } else {
+        qDebug() << "Success";
+    }
 }

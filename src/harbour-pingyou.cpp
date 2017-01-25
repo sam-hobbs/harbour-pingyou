@@ -37,6 +37,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include "accounts-model.h"
 #include "roster-model.h"
 #include "pingyou-settings.h"
+#include "account-properties-dialog-data.h"
 
 int main(int argc, char *argv[])
 {   
@@ -55,9 +56,14 @@ int main(int argc, char *argv[])
     RosterModel *rosterModel = new RosterModel();
 
     // register settings object with qml engine and expose it
-    qmlRegisterType<PingYouSettings>("harbour.pingyou.settings", 0, 1, "PingYouSettings");
+    qmlRegisterType<PingYouSettings>("harbour.pingyou", 0, 1, "PingYouSettings");
     PingYouSettings * settings = new PingYouSettings();
     view->rootContext()->setContextProperty("settings",settings);
+
+    // register the class holding the account properties
+    //qmlRegisterType<AccountPropertiesDialogData>("harbour.pingyou",0,1,"AccountPropertiesDialogData");
+    //qRegisterMetaType<AccountPropertiesDialogData>("AccountPropertiesDialogData");
+    qRegisterMetaType<AccountPropertiesDialogData>();
 
     // expose the accountsModel data model to qml https://doc.qt.io/qt-4.8/qdeclarativemodels.html
     view->rootContext()->setContextProperty("accountsModel", accountsModel);

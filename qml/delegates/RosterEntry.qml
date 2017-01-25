@@ -80,36 +80,40 @@ BackgroundItem {
 
 
 
+            Column {
+                width: parent.width
+                visible: settings.displayDevInfo
 
-//            DetailItem {
-//                id: canAuthorisePub
-//                label: "Can authorise publication"
-//                value: contact.canAuthorisePublication
-//            }
+                DetailItem {
+                    id: canAuthorisePub
+                    label: "Can authorise publication"
+                    value: contact.canAuthorisePublication
+                }
 
-//            DetailItem {
-//                id: canRemovePub
-//                label: "Can remove publication"
-//                value: contact.canRemovePublication
-//            }
+                DetailItem {
+                    id: canRemovePub
+                    label: "Can remove publication"
+                    value: contact.canRemovePublication
+                }
 
-//            DetailItem {
-//                id: canBlock
-//                label: "Can block contacts"
-//                value: contact.blocked
-//            }
+                DetailItem {
+                    id: canBlock
+                    label: "Can block contacts"
+                    value: contact.blocked
+                }
 
-//            DetailItem {
-//                id: canRequestSub
-//                label: "Can request subscription"
-//                value: contact.canRequestPresenceSubscription
-//            }
+                DetailItem {
+                    id: canRequestSub
+                    label: "Can request subscription"
+                    value: contact.canRequestPresenceSubscription
+                }
 
-//            DetailItem {
-//                id: canRescindSubRequest
-//                label: "Can rescind subscription request"
-//                value: contact.canRescindPresenceSubscriptionRequest
-//            }
+                DetailItem {
+                    id: canRescindSubRequest
+                    label: "Can rescind subscription request"
+                    value: contact.canRescindPresenceSubscriptionRequest
+                }
+            }
         }
 
         // TODO: add contact avatar?

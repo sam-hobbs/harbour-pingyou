@@ -23,6 +23,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+//import harbour.pingyou 0.1
 import "pages"
 
 ApplicationWindow

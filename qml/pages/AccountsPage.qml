@@ -44,6 +44,11 @@ Page {
                 onClicked: pageStack.push(Qt.resolvedUrl("RosterPage.qml"))
                 visible: (accountsModel.numValidAccounts > 0)
             }
+
+            MenuItem {
+                text: qsTr("Create account")
+                onClicked: pageStack.push(Qt.resolvedUrl("../dialogs/AccountPropertiesDialog.qml"),{parameterModel: Component, existingAccount: false},PageStackAction.Immediate)
+            }
         }
 
         id: listView

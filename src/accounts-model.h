@@ -30,6 +30,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QAbstractListModel>
 #include <TelepathyQt/AvatarData>
 #include <QTemporaryFile>
+//#include "account-properties-dialog-data.h"
 
 namespace Tp {
 class AccountManager;
@@ -49,13 +50,15 @@ public:
     Q_PROPERTY(QString protocolName READ protocolName CONSTANT) // not notifiable
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged)
     Q_PROPERTY(QString nickname READ nickname NOTIFY nicknameChanged)
-    Q_PROPERTY(bool connectsAutomatically READ connectsAutomatically NOTIFY connectsAutomaticallyChanged)
+    Q_PROPERTY(bool connectsAutomatically READ connectsAutomatically WRITE setConnectsAutomatically NOTIFY connectsAutomaticallyChanged)
     Q_PROPERTY(bool changingPresence READ changingPresence NOTIFY changingPresenceChanged)
     Q_PROPERTY(QString automaticPresence READ automaticPresence NOTIFY automaticPresenceChanged)
     Q_PROPERTY(QString currentPresence READ currentPresence NOTIFY currentPresenceChanged)
     Q_PROPERTY(QString requestedPresence READ requestedPresence NOTIFY requestedPresenceChanged)
     Q_PROPERTY(QVariant connectionStatus READ connectionStatus NOTIFY connectionStatusChanged)
+    Q_PROPERTY(QVariant connectionStatusReason READ connectionStatusReason NOTIFY connectionStatusReasonChanged) // NEW
     Q_PROPERTY(QString connectionPath READ connectionPath NOTIFY connectionPathChanged)
+    Q_PROPERTY(QString normalisedName READ normalisedName NOTIFY normalisedNameChanged)
 
     Q_PROPERTY(bool online READ online NOTIFY onlineChanged)
 
@@ -77,8 +80,12 @@ public:
     QString automaticPresence() const;
     QString currentPresence() const;
     QString requestedPresence() const;
+
     Tp::ConnectionStatus connectionStatus() const;
+    Tp::ConnectionStatusReason connectionStatusReason() const;
+
     QString connectionPath() const;
+    QString normalisedName() const;
 
     bool online() const;
 
@@ -93,6 +100,10 @@ public:
     Q_INVOKABLE void remove();
 
     Q_INVOKABLE void toggleEnabled();
+
+    void setConnectsAutomatically(bool);
+
+    Q_INVOKABLE void reconnect();
 
 signals:
     void validChanged(bool);
@@ -110,6 +121,8 @@ signals:
     void requestedPresenceChanged(Tp::Presence);
 
     void connectionStatusChanged(Tp::ConnectionStatus);
+    void connectionStatusReasonChanged();
+
     void connectionPathChanged(Tp::ConnectionPtr);
 
     void onlineChanged(bool);
@@ -119,6 +132,8 @@ signals:
     void setThisAccountActive(Tp::AccountPtr);
 
     void parameterListChanged();
+
+    void normalisedNameChanged(QString);
 
     void deleteMe(AccountElement *);
 
@@ -161,9 +176,14 @@ public:
 
     bool numValidAccounts() const;
 
+    Q_INVOKABLE void createAccount(QVariantMap);
+
 signals:
     void newAccountPtr(Tp::AccountPtr);
     void numValidAccountsChanged();
+
+public Q_SLOTS:
+    void genericErrorHandler(Tp::PendingOperation *);
 
 protected:
     QHash<int, QByteArray> roleNames() const; // exposes role names so they can be accessed via QML
@@ -172,6 +192,7 @@ private Q_SLOTS:
     void onAMReady(Tp::PendingOperation *);
     void addAccountElement(const Tp::AccountPtr &);
     void removeAccount(AccountElement *);
+    void onAccountCreationFinished(Tp::PendingOperation *);
 
 private:
     Tp::AccountManagerPtr mAM;
