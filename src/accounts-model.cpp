@@ -97,7 +97,7 @@ AccountElement::AccountElement(Tp::AccountPtr acc, QObject *parent) : QObject(pa
             this, SIGNAL(normalisedNameChanged(QString)));
 
     connect(mAcc.data(), SIGNAL(connectionStatusChanged(Tp::ConnectionStatus)),
-            this, SLOT(connectionStatusReasonChanged()));
+            this, SIGNAL(connectionStatusReasonChanged()));
 
     avatarChanged(mAcc->avatar());
 }
@@ -137,6 +137,8 @@ bool AccountElement::changingPresence() const {
     return mAcc->isChangingPresence();
 }
 
+// Tp::Presence is a struct (uint type, qstring status, qstring status_message)
+// https://telepathy.freedesktop.org/spec/Connection_Interface_Simple_Presence.html#Struct:Simple_Presence
 QString AccountElement::automaticPresence() const {
     return mAcc->automaticPresence().status();
 }
@@ -154,6 +156,10 @@ Tp::ConnectionStatus AccountElement::connectionStatus() const {
 }
 
 Tp::ConnectionStatusReason AccountElement::connectionStatusReason() const {
+
+    if ( !mAcc->connectionError().isEmpty() )
+        qDebug() << "Connection error for account" << mAcc->displayName() << " is: " << mAcc->connectionError() << ", connection error details are: " << mAcc->connectionErrorDetails().allDetails();
+
     return mAcc->connectionStatusReason();
 }
 
@@ -171,8 +177,14 @@ QString AccountElement::normalisedName() const {
 
 QString AccountElement::avatarPath() const {
     // avatar() returns Tp::Avatar instead of Tp::AvatarData like the contact interface. Avatar data has been written to a temporary file using Tp::Avatar.avatarData, which returns a QByteArray
-    qDebug() << "avatarPath called, path is: " << mAvatarFile->fileName();
-    return mAvatarFile->fileName();
+
+    if (QFile(mAvatarFile->fileName()).size() == 0) {
+        //qDebug() << "avatarPath called, returning empty string because the file is empty";
+        return "";
+    } else {
+        //qDebug() << "avatarPath called, path is: " << mAvatarFile->fileName();
+        return mAvatarFile->fileName();
+    }
 }
 
 void AccountElement::avatarChanged(Tp::Avatar avatar) {
@@ -259,6 +271,42 @@ void AccountElement::reconnect() {
     connect(mAcc->reconnect(),SIGNAL(finished(Tp::PendingOperation*)),
             accountsModel,SLOT(genericErrorHandler(Tp::PendingOperation*))
             );
+}
+
+
+void AccountElement::setAutomaticPresence(int statusNum, QString statusString) {
+    qDebug() << "setAutomaticPresence called";
+    AccountsModel * accountsModel = dynamic_cast<AccountsModel *>(this->parent());
+
+    Tp::SimplePresence presence;
+    presence.type=statusNum;
+    presence.status=statusString;
+
+    connect(mAcc->setAutomaticPresence(Tp::Presence(presence)),SIGNAL(finished(Tp::PendingOperation*)),
+            accountsModel,SLOT(genericErrorHandler(Tp::PendingOperation*))
+            );
+}
+
+void AccountElement::setRequestedPresence(int statusNum, QString statusString) {
+    qDebug() << "setRequestedPresence called";
+    AccountsModel * accountsModel = dynamic_cast<AccountsModel *>(this->parent());
+
+    Tp::SimplePresence presence;
+    presence.type=statusNum;
+    presence.status=statusString;
+
+    connect(mAcc->setRequestedPresence(Tp::Presence(presence)),SIGNAL(finished(Tp::PendingOperation*)),
+            accountsModel,SLOT(genericErrorHandler(Tp::PendingOperation*))
+            );
+}
+
+QString AccountElement::connectionError() const {
+    return mAcc->connectionError();
+}
+
+QVariant AccountElement::connectionErrorDetails() const {
+    QVariantMap map = mAcc->connectionErrorDetails().allDetails();
+    return QVariant::fromValue(map);
 }
 
 // ==========================================================
@@ -382,7 +430,7 @@ bool AccountsModel::numValidAccounts() const {
         }
     }
 
-    qDebug() << "number of valid accounts is: " << numValid;
+    //qDebug() << "number of valid accounts is: " << numValid;
     return numValid;
 }
 
@@ -447,40 +495,47 @@ void AccountsModel::removeAccount(AccountElement * account) {
  * \sa supportedAccountProperties()
  */
 
-//AccountManager::PendingAccount *createAccount(const QString &connectionManager,
-//            const QString &protocol, const QString &displayName,
-//            const QVariantMap &parameters,
-//const QVariantMap &properties = QVariantMap());
-
 void AccountsModel::createAccount(QVariantMap parameters) {
     qDebug() << "Printing account properties from createAccount";
     qDebug() << parameters;
 
+    // iterate through the qvariantmap and remove empty strings
+    QVariantMap::iterator iter = parameters.begin();
+    while( iter !=parameters.end() ) {
+        qDebug() << "Current item is " << iter.key() << iter.value();
+        if (iter.value() == QVariant(QString(""))) {
+            qDebug() << "removing empty string";
+            iter = parameters.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
 
-    parameters["keepalive-interval"]= QVariant(parameters.value("keepalive-interval").toUInt());
-    parameters["https-proxy-port"]= QVariant(parameters.value("https-proxy-port").toUInt());
-    parameters["priority"]= QVariant(parameters.value("priority").toInt());
-    parameters["fallback-socks5-proxies"]= QVariant(parameters.value("fallback-socks5-proxies").toStringList());
-    parameters["extra-certificate-identities"]= QVariant(parameters.value("extra-certificate-identities").toStringList());
-    parameters["fallback-servers"]= QVariant(parameters.value("fallback-servers").toStringList());
-    parameters["fallback-stun-port"]= QVariant(parameters.value("fallback-stun-port").toUInt());
-    parameters["port"]= QVariant(parameters.value("port").toUInt());
-    parameters["stun-port"]= QVariant(parameters.value("stun-port").toUInt());
+    qDebug() << "Changing types";
+    if (parameters.contains("keepalive-interval")) parameters["keepalive-interval"]= QVariant(parameters.value("keepalive-interval").toUInt());
+    if (parameters.contains("https-proxy-port")) parameters["https-proxy-port"]= QVariant(parameters.value("https-proxy-port").toUInt());
+    if (parameters.contains("priority")) parameters["priority"]= QVariant(parameters.value("priority").toInt());
+    if (parameters.contains("fallback-cocks5-proxies")) parameters["fallback-socks5-proxies"]= QVariant(parameters.value("fallback-socks5-proxies").toStringList());
+    if (parameters.contains("extra-certificate-identities")) parameters["extra-certificate-identities"]= QVariant(parameters.value("extra-certificate-identities").toStringList());
+    if (parameters.contains("fallback-servers")) parameters["fallback-servers"]= QVariant(parameters.value("fallback-servers").toStringList());
+    if (parameters.contains("fallback-stun-port")) parameters["fallback-stun-port"]= QVariant(parameters.value("fallback-stun-port").toUInt());
+    if (parameters.contains("port")) parameters["port"]= QVariant(parameters.value("port").toUInt());
+    if (parameters.contains("stun-port")) parameters["stun-port"]= QVariant(parameters.value("stun-port").toUInt());
 
     qDebug() << "Printing account properties after fixing types";
     qDebug() << parameters;
 
-    //qDebug() << QVariant::fromValue(properties);
+    // create a qvariantmap of properties to use in account creation
+    QVariantMap properties;
+    properties.insert("org.freedesktop.Telepathy.Account.Enabled",QVariant(true));
+    properties.insert("org.freedesktop.Telepathy.Account.ConnectAutomatically",QVariant(true));
+
+    // create an account with display name equal to the account name
     Tp::PendingAccount * pendingAccount = mAM->createAccount("gabble",
                        "jabber",
-                       "foo",
+                       parameters.value("account").toString(),
                        parameters);
 
-
-//    connect(mAM.data(),
-//            SIGNAL(newAccount(const Tp::AccountPtr &)),
-//            SLOT(addAccountElement(const Tp::AccountPtr &))
-//            );
 
     connect(pendingAccount, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onAccountCreationFinished(Tp::PendingOperation*))

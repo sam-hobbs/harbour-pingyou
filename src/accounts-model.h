@@ -52,9 +52,11 @@ public:
     Q_PROPERTY(QString nickname READ nickname NOTIFY nicknameChanged)
     Q_PROPERTY(bool connectsAutomatically READ connectsAutomatically WRITE setConnectsAutomatically NOTIFY connectsAutomaticallyChanged)
     Q_PROPERTY(bool changingPresence READ changingPresence NOTIFY changingPresenceChanged)
+
     Q_PROPERTY(QString automaticPresence READ automaticPresence NOTIFY automaticPresenceChanged)
     Q_PROPERTY(QString currentPresence READ currentPresence NOTIFY currentPresenceChanged)
     Q_PROPERTY(QString requestedPresence READ requestedPresence NOTIFY requestedPresenceChanged)
+
     Q_PROPERTY(QVariant connectionStatus READ connectionStatus NOTIFY connectionStatusChanged)
     Q_PROPERTY(QVariant connectionStatusReason READ connectionStatusReason NOTIFY connectionStatusReasonChanged) // NEW
     Q_PROPERTY(QString connectionPath READ connectionPath NOTIFY connectionPathChanged)
@@ -65,6 +67,9 @@ public:
     Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged) //TODO
 
     Q_PROPERTY(QVariant parameterList READ parameterList NOTIFY parameterListChanged)
+
+    Q_PROPERTY(QString connectionError READ connectionError NOTIFY connectionStatusChanged)
+    Q_PROPERTY(QVariant connectionErrorDetails READ connectionErrorDetails NOTIFY connectionStatusChanged)
 
     AccountElement (Tp::AccountPtr acc, QObject *parent = 0);
 
@@ -89,6 +94,9 @@ public:
 
     bool online() const;
 
+    QString connectionError() const;
+    QVariant connectionErrorDetails() const;
+
     QVariant parameterList() const;
 
     QString avatarPath() const;
@@ -104,6 +112,9 @@ public:
     void setConnectsAutomatically(bool);
 
     Q_INVOKABLE void reconnect();
+
+    Q_INVOKABLE void setAutomaticPresence(int, QString statusString);
+    Q_INVOKABLE void setRequestedPresence(int, QString statusString);
 
 signals:
     void validChanged(bool);

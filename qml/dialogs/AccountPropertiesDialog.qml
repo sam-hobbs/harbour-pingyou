@@ -69,6 +69,8 @@ Dialog {
                 labelVisible: true
 
                 width: parent.width
+
+                focus: true
             }
 
             TextField {

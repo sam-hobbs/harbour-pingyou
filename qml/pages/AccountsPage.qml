@@ -47,7 +47,7 @@ Page {
 
             MenuItem {
                 text: qsTr("Create account")
-                onClicked: pageStack.push(Qt.resolvedUrl("../dialogs/AccountPropertiesDialog.qml"),{parameterModel: Component, existingAccount: false},PageStackAction.Immediate)
+                onClicked: pageStack.push(Qt.resolvedUrl("../dialogs/AccountPropertiesDialog.qml"),{parameterModel: {}, existingAccount: false},PageStackAction.Immediate)
             }
         }
 

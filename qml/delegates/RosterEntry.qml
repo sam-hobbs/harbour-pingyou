@@ -74,7 +74,7 @@ BackgroundItem {
 
             DetailItem {
                 id: blockDetail
-                label: "Block state"
+                label: "Blocked"
                 value: contact.blocked
             }
 
@@ -115,8 +115,6 @@ BackgroundItem {
                 }
             }
         }
-
-        // TODO: add contact avatar?
 
 
         menu: ContextMenu {

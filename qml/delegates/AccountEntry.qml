@@ -91,7 +91,8 @@ BackgroundItem {
 
         ExpandingSection {
             id: expanding
-            title: (account.valid && account.enabled) ? account.nickname + " (enabled)" : account.nickname + " (disabled)"
+            //title: (account.valid && account.enabled) ? account.nickname + " (enabled)" : account.nickname + " (disabled)"
+            title: (account.nickname !== "") ? account.nickname : account.displayName
             expanded: (account.valid && account.enabled)
             //height: column.height
             content.sourceComponent:
@@ -114,6 +115,117 @@ BackgroundItem {
                     anchors.horizontalCenter: parent.horizontalCenter
                     //cache: false
                 }
+
+                Item {
+                    width: 1
+                    //height: Theme.paddingMedium
+                    height: Theme.paddingLarge
+                    visible: (avatarImage.height > 0) ? true : false
+                }
+
+                Rectangle {
+                    width: parent.width/2
+                    height: Theme.paddingMedium
+                    color: (account.connectionError === "") ?  account.online ? "green" : "grey" : "red"
+                    radius: 10
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+
+                ComboBox {
+                    width: parent.width
+                    label: "Presence"
+                    menu: ContextMenu {
+                        MenuItem {
+                            text: "Offline"
+                            onClicked: account.setRequestedPresence(1,"offline")
+                        }
+
+                        MenuItem {
+                            text: "Available"
+                            onClicked: account.setRequestedPresence(2,"available")
+                        }
+
+                        MenuItem {
+                            text: "Away"
+                            onClicked: account.setRequestedPresence(3,"away")
+                        }
+
+                        MenuItem {
+                            text: "Extended Away"
+                            onClicked: account.setRequestedPresence(4,"extended away")
+                        }
+
+                        MenuItem {
+                            text: "Hidden"
+                            onClicked: account.setRequestedPresence(5,"hidden")
+                        }
+
+                        MenuItem {
+                            text: "Busy"
+                            onClicked: account.setRequestedPresence(6,"busy")
+                        }
+                    }
+
+                    currentIndex: {
+                        switch(account.automaticPresence) {
+                        case "offline": 0; break;
+                        case "available": 1; break;
+                        case "away": 2; break;
+                        case "extended away": 3; break;
+                        case "hidden": 4; break;
+                        case "busy": 5; break;
+                        default: -1; break;
+                        }
+                    }
+                }
+
+                // https://telepathy.freedesktop.org/spec/Connection_Interface_Simple_Presence.html#Enum:Connection_Presence_Type
+                ComboBox {
+                    width: parent.width
+                    label: "Automatic presence"
+
+                    currentIndex: {
+                        switch(account.automaticPresence) {
+                        case "available": 0; break;
+                        case "away": 1; break;
+                        case "extended away": 2; break;
+                        case "hidden": 3; break;
+                        case "busy": 4; break;
+                        default: -1; break;
+                        }
+                    }
+
+                    menu: ContextMenu {
+
+                        MenuItem {
+                            text: "Available"
+                            onClicked: account.setAutomaticPresence(2,"available")
+                        }
+
+                        MenuItem {
+                            text: "Away"
+                            onClicked: account.setAutomaticPresence(3,"away")
+                        }
+
+                        MenuItem {
+                            text: "Extended Away"
+                            onClicked: account.setAutomaticPresence(4,"extended away")
+                        }
+
+                        MenuItem {
+                            text: "Hidden"
+                            onClicked: account.setAutomaticPresence(5,"hidden")
+                        }
+
+                        MenuItem {
+                            text: "Busy"
+                            onClicked: account.setAutomaticPresence(6,"busy")
+                        }
+                    }
+                }
+
+
 
                 DetailItem {
                     id: onlineDetail
@@ -246,6 +358,53 @@ BackgroundItem {
                         }
                     }
                     visible: settings.displayDevInfo
+                }
+
+
+                Column {
+                    id: connectionError
+                    width: parent.width
+                    visible: (account.connectionError === "") ? false : true
+
+                    Label {
+                        text: "Connection Error"
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        font.family: Theme.fontFamilyHeading
+                    }
+
+                    Image {
+                        asynchronous: true
+                        source: "image://theme/icon-lock-warning"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Label {
+                        text: account.connectionError
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        horizontalAlignment: Text.AlignHCenter
+
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        width: parent.width
+
+                        font.family: Theme.fontFamilyHeading
+                        font.pixelSize: Theme.fontSizeSmall
+
+                    }
+
+                    Label {
+                        text: account.connectionErrorDetails["debug-message"] ? account.connectionErrorDetails["debug-message"] : ""
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        horizontalAlignment: Text.AlignHCenter
+
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        width: parent.width
+
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
                 }
 
                 DetailItem {
