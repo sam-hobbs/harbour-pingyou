@@ -110,10 +110,9 @@ BackgroundItem {
                     height: (avatarImage.status === Image.Ready) ? width : 0
                     asynchronous: true // don't block the UI while the image is loaded
                     fillMode: Image.PreserveAspectFit
-                    source: account.avatarPath
+                    source: (account.avatarPath !== "") ? account.avatarPath : "qrc:///silhouette"
                     width: parent.width/2
                     anchors.horizontalCenter: parent.horizontalCenter
-                    //cache: false
                 }
 
                 Item {

@@ -1,7 +1,8 @@
 <RCC>
-    <qresource>
+    <qresource prefix="/">
         <file alias="tux">resources/tux.svg</file>
         <file alias="tux-sleeping">resources/tux-sleeping.svg</file>
-	<file alias="tux-message">resources/tux-message.svg</file>
+        <file alias="tux-message">resources/tux-message.svg</file>
+        <file alias="silhouette">resources/silhouette-man.svg</file>
     </qresource>
 </RCC>
