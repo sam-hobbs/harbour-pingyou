@@ -33,7 +33,7 @@ HEADERS += \
 
 
 OTHER_FILES += \
-    rpm/harbour-pingyou.changes.in \
+    rpm/harbour-pingyou.changes \
     rpm/harbour-pingyou.spec \
     rpm/harbour-pingyou.yaml \
     translations/*.ts \

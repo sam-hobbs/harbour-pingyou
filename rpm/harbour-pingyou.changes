@@ -8,8 +8,5 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
-* Sun Apr 13 2014 Jack Tar <jack.tar@example.com> 0.0.1-1
-- Scrubbed the deck
-- Hoisted the sails
-
-
+* Sun Jan 29 2017 Sam Hobbs <sam@samhobbs.co.uk> 0.1-1
+- First release with account and roster management
