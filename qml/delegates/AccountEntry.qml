@@ -139,7 +139,7 @@ BackgroundItem {
 
                         MenuItem {
                             text: "Extended Away"
-                            onClicked: account.setRequestedPresence(4,"extended away")
+                            onClicked: account.setRequestedPresence(4,"xa")
                         }
 
                         MenuItem {
@@ -149,18 +149,18 @@ BackgroundItem {
 
                         MenuItem {
                             text: "Busy"
-                            onClicked: account.setRequestedPresence(6,"busy")
+                            onClicked: account.setRequestedPresence(6,"dnd")
                         }
                     }
 
                     currentIndex: {
-                        switch(account.automaticPresence) {
+                        switch(account.currentPresence) {
                         case "offline": 0; break;
                         case "available": 1; break;
                         case "away": 2; break;
-                        case "extended away": 3; break;
+                        case "xa": 3; break;
                         case "hidden": 4; break;
-                        case "busy": 5; break;
+                        case "dnd": 5; break;
                         default: -1; break;
                         }
                     }
@@ -175,7 +175,7 @@ BackgroundItem {
                         switch(account.automaticPresence) {
                         case "available": 0; break;
                         case "away": 1; break;
-                        case "extended away": 2; break;
+                        case "xa": 2; break;
                         case "hidden": 3; break;
                         case "busy": 4; break;
                         default: -1; break;
@@ -196,7 +196,7 @@ BackgroundItem {
 
                         MenuItem {
                             text: "Extended Away"
-                            onClicked: account.setAutomaticPresence(4,"extended away")
+                            onClicked: account.setAutomaticPresence(4,"xa")
                         }
 
                         MenuItem {
