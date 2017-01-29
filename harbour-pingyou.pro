@@ -29,9 +29,7 @@ HEADERS += \
     src/accounts-model.h \
     src/roster-model.h \
     src/pingyou-settings.h \
-    src/account-properties-dialog-data.h \
     src/filemodel.h
-    #src/account-properties-dialog-data.h
 
 
 OTHER_FILES += \
