@@ -3,30 +3,41 @@ An XMPP client for SailfishOS implemented using [TelepathyQt](https://github.com
 
 ## Screenshots
 
-None yet.
+![Account](/screenshots/Screenshot-17-01-29-17-52-55_account.png)
+
+![Roster](/screenshots/Screenshot-17-01-29-17-52-40_roster.png)
+
+![Add accounts](/screenshots/Screenshot-17-01-29-17-53-16_addaccount.png)
+
 
 ## Features
 
 PingYou is still in the very early stages of development. The following features are currently supported:
 
-* Listing existing account details
+* Account management (add, remove, change account details)
+* Roster management (add, remove and block contacts, manage presence subscription and publication)
 
 ## Development Priorities
 
 The following list describes the development priorites for PingYou. If the order looks strange, bear in mind that some features are already supported by Jolla's built-in XMPP client (jolla-messages), and the immediate priority is to address these shortfalls before adding other features, since the two apps can complement each other:
 
-- [ ] Allow the user to view their roster, and also:
-    - [ ]  Authorize subscription requests
-    - [ ] Deny subscription requests
-    - [ ] Remove contact
-    - [ ] Block contact
-    - [ ] Add contact / send subscription request
+- [x] Allow the user to view their roster, and also:
+    - [x]  Authorize subscription requests
+    - [x] Deny subscription requests
+    - [x] Remove contact
+    - [x] Block contact
+    - [x] Add contact / send subscription request
+    - [x] View contact avatars
+- [x] List accounts, and also:
+    - [x] Modify existing account details
+    - [x] Add new account
+    - [x] Remove account
+    - [x] View and set avatar
 - [ ] Send and receive messages to individual contacts
 - [ ] Add notifications
 - [ ] Add support for group chats (MUC)
 - [ ] Ability to create new MUC room from PingYou
 - [ ] File transfer support
-- [ ] Add new contacts
 - [ ] Local message storage
 - [ ] Retrieve messages from the server (MAM) - if possible with Telepathy
 - [ ] Support for message carbons
