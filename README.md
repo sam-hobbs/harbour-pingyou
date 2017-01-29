@@ -3,11 +3,9 @@ An XMPP client for SailfishOS implemented using [TelepathyQt](https://github.com
 
 ## Screenshots
 
-![Account](/screenshots/Screenshot-17-01-29-17-52-55_account.png)
-
-![Roster](/screenshots/Screenshot-17-01-29-17-52-40_roster.png)
-
-![Add accounts](/screenshots/Screenshot-17-01-29-17-53-16_addaccount.png)
+<img src="/screenshots/Screenshot-17-01-29-17-52-55_account.png" width="200">
+<img src="/screenshots/Screenshot-17-01-29-17-52-40_roster.png" width="200">
+<img src="/screenshots/Screenshot-17-01-29-17-53-16_addaccount.png" width="200">
 
 
 ## Features
