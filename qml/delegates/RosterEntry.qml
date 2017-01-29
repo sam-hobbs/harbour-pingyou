@@ -54,6 +54,36 @@ BackgroundItem {
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
+            Item {
+                width: 1
+                height: Theme.paddingLarge
+                visible: (avatarImage.height > 0) ? true : false
+            }
+
+            Rectangle {
+                width: parent.width/2
+                height: Theme.paddingMedium
+                //color: (account.connectionError === "" || account.connectionError === "org.freedesktop.Telepathy.Error.Cancelled") ?  account.online ? "green" : "grey" : "red"
+                color: {
+                    switch(contact.status) {
+                        case "offline": "grey"; break;
+                        case "available": "green"; break;
+                        case "away": "orange"; break;
+                        case "xa": "orange"; break;
+                        case "dnd": "red"; break;
+                        default: "grey"; break;
+                    }
+                }
+
+                radius: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Item {
+                width: 1
+                height: Theme.paddingSmall
+            }
+
             DetailItem {
                 id: statusDetail
                 label: "Status"

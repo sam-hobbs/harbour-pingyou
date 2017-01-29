@@ -90,6 +90,10 @@ RosterElement::RosterElement (Tp::ContactPtr contact, QObject *parent) : QObject
             SIGNAL(blockedChanged())
             );
 
+    connect(contact.data(), SIGNAL(presenceChanged(Tp::Presence)),
+            SIGNAL(statusChanged())
+            );
+
     mContact->requestAvatarData();
 
 }
