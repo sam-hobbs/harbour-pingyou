@@ -45,7 +45,7 @@ class AccountElement : public QObject
 public:
     // properties of account recreated here
     Q_PROPERTY(bool valid READ valid NOTIFY validChanged)
-    Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(QString cmName READ cmName CONSTANT) // not notifiable
     Q_PROPERTY(QString protocolName READ protocolName CONSTANT) // not notifiable
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged)
@@ -58,7 +58,7 @@ public:
     Q_PROPERTY(QString requestedPresence READ requestedPresence NOTIFY requestedPresenceChanged)
 
     Q_PROPERTY(QVariant connectionStatus READ connectionStatus NOTIFY connectionStatusChanged)
-    Q_PROPERTY(QVariant connectionStatusReason READ connectionStatusReason NOTIFY connectionStatusReasonChanged) // NEW
+    Q_PROPERTY(QVariant connectionStatusReason READ connectionStatusReason NOTIFY connectionStatusReasonChanged)
     Q_PROPERTY(QString connectionPath READ connectionPath NOTIFY connectionPathChanged)
     Q_PROPERTY(QString normalisedName READ normalisedName NOTIFY normalisedNameChanged)
 
@@ -110,6 +110,7 @@ public:
     Q_INVOKABLE void toggleEnabled();
 
     void setConnectsAutomatically(bool);
+    void setEnabled(bool);
 
     Q_INVOKABLE void reconnect();
 

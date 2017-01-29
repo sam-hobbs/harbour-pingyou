@@ -144,6 +144,7 @@ QString AccountElement::automaticPresence() const {
 }
 
 QString AccountElement::currentPresence() const {
+    qDebug() << mAcc->currentPresence().status();
     return mAcc->currentPresence().status();
 }
 
@@ -188,7 +189,7 @@ QString AccountElement::avatarPath() const {
 }
 
 void AccountElement::avatarChanged(Tp::Avatar avatar) {
-    qDebug() << "avatar changed, writing to temporary file";
+    //qDebug() << "avatar changed, writing to temporary file";
 
     // QML Image element doesn't reload the image if the source filename doesn't change. Therefore, create a new temporary file (with a different path), swap it out and delete the old one
     QTemporaryFile * oldAvatar = mAvatarFile;
@@ -257,12 +258,17 @@ void AccountElement::toggleEnabled() {
 
 
 void AccountElement::setConnectsAutomatically(bool setting) {
-
     // check that we are setting something different to the current value
     if (setting != connectsAutomatically())
         mAcc->setConnectsAutomatically(setting);
 
     // TODO: connect pending operation to a generic error handling slot
+}
+
+void AccountElement::setEnabled(bool setting) {
+    // check that we are setting something different to the current value
+    if (setting != enabled())
+        mAcc->setEnabled(setting);
 }
 
 void AccountElement::reconnect() {

@@ -58,13 +58,6 @@ BackgroundItem {
                 }
             }
 
-            MenuItem {
-                text: account.enabled ? qsTr("Disable") : qsTr("Enable")
-                onClicked: {
-                    console.log("Toggling enabled state for " + account.displayName)
-                    account.toggleEnabled();
-                }
-            }
 
             MenuItem {
                 text: qsTr("Remove account")
@@ -75,15 +68,9 @@ BackgroundItem {
             }
 
             MenuItem {
-                text: account.connectsAutomatically ? qsTr("Don't connect automatically") : qsTr("Connect automatically")
-                onClicked: {
-                    account.connectsAutomatically = !account.connectsAutomatically
-                }
-            }
-
-            MenuItem {
                 text: qsTr("Reconnect")
                 onClicked: account.reconnect()
+                visible: settings.displayDevInfo
             }
         }
 
@@ -125,7 +112,7 @@ BackgroundItem {
                 Rectangle {
                     width: parent.width/2
                     height: Theme.paddingMedium
-                    color: (account.connectionError === "") ?  account.online ? "green" : "grey" : "red"
+                    color: (account.connectionError === "" || account.connectionError === "org.freedesktop.Telepathy.Error.Cancelled") ?  account.online ? "green" : "grey" : "red"
                     radius: 10
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
@@ -224,146 +211,180 @@ BackgroundItem {
                     }
                 }
 
-
-
-                DetailItem {
-                    id: onlineDetail
-                    label: "Online"
-                    value: account.online ? "true" : "false"
-                    //visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: validDetail
-                    label: "Valid"
-                    value: account.valid ? "true" : "false"
-                    //visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: enabledDetail
+                ComboBox {
+                    width: parent.width
                     label: "Enabled"
-                    value: account.enabled ? "true" : "false"
-                    //visible: settings.displayDevInfo
-                }
 
-                DetailItem {
-                    id: displayNameDetail
-                    label: "Display name"
-                    value: account.displayName
-                    visible: (settings.displayDevInfo || (account.displayName !== account.nickname))
-                }
+                    currentIndex: account.enabled ? 0 : 1
 
-                DetailItem {
-                    id: nicknameDetail
-                    label: "Nickname"
-                    value: account.nickname
-                    visible: settings.displayDevInfo
-                }
+                    menu: ContextMenu {
+                        MenuItem {
+                            text: "Yes"
+                            onClicked: account.enabled = 1
+                        }
 
-                DetailItem {
-                    id: normalisedAccountNameDetail
-                    label: "Normalised account name"
-                    value: account.normalisedName
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: connectionManagerDetail
-                    label: "Connection Manager"
-                    value: account.cmName
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: protocolDetail
-                    label: "Protocol Name"
-                    value: account.protocolName
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: connectsAutomaticallyDetail
-                    label: "Connects Automatically"
-                    value: account.connectsAutomatically ? "true" : "false"
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: currentPresenceDetail
-                    label: "Current Presence"
-                    value: account.automaticPresence
-                }
-
-                DetailItem {
-                    id: changingPresenceDetail
-                    label: "Changing Presence"
-                    value: account.changingPresence ? "true" : "false"
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: automaticPresenceDetail
-                    label: "Automatic Presence"
-                    value: account.automaticPresence
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: requestedPresenceDetail
-                    label: "Requested Presence"
-                    value: account.requestedPresence
-                    visible: settings.displayDevInfo
-                }
-
-                DetailItem {
-                    id: connectionStatusDetail
-                    label: "Connection Status"
-                    value: {
-                        switch(account.connectionStatus) {
-                        case 0: "Connected"; break;
-                        case 1: "Connecting"; break;
-                        case 2: "Disconnected"; break;
-                        default: ""; break;
+                        MenuItem {
+                            text: "No"
+                            onClicked: account.enabled = 0
                         }
                     }
-                    visible: settings.displayDevInfo
                 }
 
-                // https://telepathy.freedesktop.org/spec/Connection.html#Enum:Connection_Status
-                DetailItem {
-                    id: connectionStatusReasonDetail
-                    label: "Connection status reason"
-                    value: {
-                        switch(account.connectionStatusReason) {
-                        case 0: "None specified"; break;
-                        case 1: "Requested"; break;
-                        case 2: "Network error"; break;
-                        case 3: "Authentication failed"; break;
-                        case 4: "Encryption error"; break;
-                        case 5: "Name in use"; break;
-                        case 6: "Cert not provided"; break;
-                        case 7: "Cert untrusted"; break;
-                        case 8: "Cert expired"; break;
-                        case 9: "Cert not activated"; break;
-                        case 10: "Cert hostname mismatch"; break;
-                        case 11: "Cert fingerprint mismatch"; break;
-                        case 12: "Cert self signed"; break;
-                        case 13: "Cert other error"; break;
-                        case 14: "Cert revoked"; break;
-                        case 15: "Cert insecure"; break;
-                        case 16: "Cert limit exceeded"; break;
-                        default: ""; break;
+                ComboBox {
+                    width: parent.width
+                    label: "Connect automatically"
+
+                    currentIndex: account.connectsAutomatically ? 0 : 1
+
+                    menu: ContextMenu {
+                        MenuItem {
+                            text: "Yes"
+                            onClicked: account.connectsAutomatically = 1
+                        }
+
+                        MenuItem {
+                            text: "No"
+                            onClicked: account.connectsAutomatically = 0
                         }
                     }
+                }
+
+
+                Column {
+                    width: parent.width
                     visible: settings.displayDevInfo
+
+                    DetailItem {
+                        id: onlineDetail
+                        label: "Online"
+                        value: account.online ? "true" : "false"
+                    }
+
+                    DetailItem {
+                        id: validDetail
+                        label: "Valid"
+                        value: account.valid ? "true" : "false"
+                    }
+
+                    DetailItem {
+                        id: enabledDetail
+                        label: "Enabled"
+                        value: account.enabled ? "true" : "false"
+                    }
+
+                    DetailItem {
+                        id: displayNameDetail
+                        label: "Display name"
+                        value: account.displayName
+                    }
+
+                    DetailItem {
+                        id: nicknameDetail
+                        label: "Nickname"
+                        value: account.nickname
+                    }
+
+                    DetailItem {
+                        id: normalisedAccountNameDetail
+                        label: "Normalised account name"
+                        value: account.normalisedName
+                    }
+
+                    DetailItem {
+                        id: connectionManagerDetail
+                        label: "Connection Manager"
+                        value: account.cmName
+                    }
+
+                    DetailItem {
+                        id: protocolDetail
+                        label: "Protocol Name"
+                        value: account.protocolName
+                    }
+
+                    DetailItem {
+                        id: connectsAutomaticallyDetail
+                        label: "Connects Automatically"
+                        value: account.connectsAutomatically ? "true" : "false"
+                    }
+
+                    DetailItem {
+                        id: currentPresenceDetail
+                        label: "Current Presence"
+                        value: account.currentPresence
+                    }
+
+                    DetailItem {
+                        id: changingPresenceDetail
+                        label: "Changing Presence"
+                        value: account.changingPresence ? "true" : "false"
+                    }
+
+                    DetailItem {
+                        id: automaticPresenceDetail
+                        label: "Automatic Presence"
+                        value: account.automaticPresence
+                    }
+
+                    DetailItem {
+                        id: requestedPresenceDetail
+                        label: "Requested Presence"
+                        value: account.requestedPresence
+                    }
+
+                    DetailItem {
+                        id: connectionStatusDetail
+                        label: "Connection Status"
+                        value: {
+                            switch(account.connectionStatus) {
+                            case 0: "Connected"; break;
+                            case 1: "Connecting"; break;
+                            case 2: "Disconnected"; break;
+                            default: ""; break;
+                            }
+                        }
+                    }
+
+                    // https://telepathy.freedesktop.org/spec/Connection.html#Enum:Connection_Status
+                    DetailItem {
+                        id: connectionStatusReasonDetail
+                        label: "Connection status reason"
+                        value: {
+                            switch(account.connectionStatusReason) {
+                            case 0: "None specified"; break;
+                            case 1: "Requested"; break;
+                            case 2: "Network error"; break;
+                            case 3: "Authentication failed"; break;
+                            case 4: "Encryption error"; break;
+                            case 5: "Name in use"; break;
+                            case 6: "Cert not provided"; break;
+                            case 7: "Cert untrusted"; break;
+                            case 8: "Cert expired"; break;
+                            case 9: "Cert not activated"; break;
+                            case 10: "Cert hostname mismatch"; break;
+                            case 11: "Cert fingerprint mismatch"; break;
+                            case 12: "Cert self signed"; break;
+                            case 13: "Cert other error"; break;
+                            case 14: "Cert revoked"; break;
+                            case 15: "Cert insecure"; break;
+                            case 16: "Cert limit exceeded"; break;
+                            default: ""; break;
+                            }
+                        }
+                    }
+
+                    DetailItem {
+                        id: connectionDetail
+                        label: "Connection Path"
+                        value: account.connectionPath
+                    }
                 }
 
 
                 Column {
                     id: connectionError
                     width: parent.width
-                    visible: (account.connectionError === "") ? false : true
+                    visible: (account.connectionError !== "" && account.connectionError !== "org.freedesktop.Telepathy.Error.Cancelled") ? true : false
 
                     Label {
                         text: "Connection Error"
@@ -405,14 +426,6 @@ BackgroundItem {
                         font.pixelSize: Theme.fontSizeSmall
                     }
                 }
-
-                DetailItem {
-                    id: connectionDetail
-                    label: "Connection Path"
-                    value: account.connectionPath
-                    visible: settings.displayDevInfo
-                }
-
             }
         }
 
