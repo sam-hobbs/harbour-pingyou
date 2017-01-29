@@ -2,7 +2,7 @@
 
 PingYou
 
-Copyright (C) 2015 Sam Hobbs
+Copyright (C) 2017 Sam Hobbs
 
 This file is part of PingYou.
 
@@ -343,11 +343,6 @@ void AccountElement::setAvatar(QString path) {
 AccountsModel::AccountsModel(QObject *parent) {
     Q_UNUSED(parent);
 
-//    mAM = Tp::AccountManager::create(
-//                Tp::AccountFactory::create(QDBusConnection::sessionBus(),
-//                Tp::Account::FeatureCore)
-//                );
-
     mAM = Tp::AccountManager::create(
                 Tp::AccountFactory::create(QDBusConnection::sessionBus(),Tp::Account::FeatureCore | Tp::Account::FeatureAvatar | Tp::Account::FeatureProfile), // unused options: Tp::Account::FeatureAvatar, Tp::Account::FeatureCapabilities, Tp::Account::FeatureProfile used to list parameters, Tp::Account::FeatureProtocolInfo
                 Tp::ConnectionFactory::create(QDBusConnection::sessionBus(), Tp::Connection::FeatureConnected | Tp::Connection::FeatureRoster | Tp::Connection::FeatureRosterGroups), // unused options: Tp::Connection::FeatureAccountBalance, Tp::Connection::FeatureCore, Tp::Connection::FeatureSelfContact, Tp::Connection::FeatureSimplePresence
@@ -500,47 +495,6 @@ void AccountsModel::removeAccount(AccountElement * account) {
 }
 
 
-///**
-// * Update this account parameters.
-// *
-// * On success, the PendingOperation returned by this method will produce a
-// * list of strings, which are the names of parameters whose changes will not
-// * take effect until the account is disconnected and reconnected (for instance
-// * by calling reconnect()).
-// *
-// * \param set Parameters to set.
-// * \param unset Parameters to unset.
-// * \return A PendingStringList which will emit PendingStringList::finished
-// *         when the request has been made
-// * \sa parametersChanged(), parameters(), reconnect()
-// */
-//PendingStringList *Account::updateParameters(const QVariantMap &set,
-//        const QStringList &unset)
-//{
-//    return new PendingStringList(
-//            baseInterface()->UpdateParameters(set, unset),
-//            AccountPtr(this));
-//}
-
-/**
- * Create an account with the given parameters.
- *
- * The optional \a properties argument can be used to set any property listed in
- * supportedAccountProperties() at the time the account is created.
- *
- * \param connectionManager The name of the connection manager to create the account
- *                          for.
- * \param protocol The name of the protocol to create the account for.
- * \param displayName The account display name.
- * \param parameters The account parameters.
- * \param properties An optional map from fully qualified D-Bus property
- *                   names such as "org.freedesktop.Telepathy.Account.Enabled"
- *                   to their values.
- * \return A PendingAccount object which will emit PendingAccount::finished
- *         when the account has been created of failed its creation process.
- * \sa supportedAccountProperties()
- */
-
 
 void AccountsModel::prepareParameterQVariantMap(QVariantMap parameters) {
 
@@ -567,7 +521,6 @@ void AccountsModel::prepareParameterQVariantMap(QVariantMap parameters) {
     if (parameters.contains("port")) parameters["port"]= QVariant(parameters.value("port").toUInt());
     if (parameters.contains("stun-port")) parameters["stun-port"]= QVariant(parameters.value("stun-port").toUInt());
 
-    // TODO: change dialog so account is required before dialog is accepted
     Q_ASSERT(parameters.contains("account") && !parameters.value("account").toString().isEmpty());
 
     QString accountName = parameters.value("account").toString();

@@ -2,7 +2,7 @@
 
 PingYou
 
-Copyright (C) 2015 Sam Hobbs
+Copyright (C) 2017 Sam Hobbs
 
 This file is part of PingYou.
 

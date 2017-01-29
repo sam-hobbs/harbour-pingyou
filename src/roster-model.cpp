@@ -2,7 +2,7 @@
 
 PingYou
 
-Copyright (C) 2015 Sam Hobbs
+Copyright (C) 2017 Sam Hobbs
 
 This file is part of PingYou.
 
@@ -24,7 +24,6 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Types>
 #include <TelepathyQt/Account>
 #include <TelepathyQt/Contact>
-//#include <TelepathyQt/ContactCapabilities>
 #include <TelepathyQt/ContactManager>
 #include <TelepathyQt/PendingConnection>
 #include <TelepathyQt/PendingContacts>

@@ -2,7 +2,7 @@
 
 PingYou
 
-Copyright (C) 2015 Sam Hobbs
+Copyright (C) 2017 Sam Hobbs
 
 This file is part of PingYou.
 
@@ -29,9 +29,6 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <TelepathyQt/Debug>
 #include <TelepathyQt/Constants>
 #include <TelepathyQt/Types>
-//#include <QDebug>
-//#include <QtCore>
-//#include "protocols.h"
 #include <QObject>
 
 #include "accounts-model.h"

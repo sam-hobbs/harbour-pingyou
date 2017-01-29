@@ -2,7 +2,7 @@
 
 PingYou
 
-Copyright (C) 2015 Sam Hobbs
+Copyright (C) 2017 Sam Hobbs
 
 This file is part of PingYou.
 
@@ -30,7 +30,6 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include <QAbstractListModel>
 #include <TelepathyQt/AvatarData>
 #include <QTemporaryFile>
-//#include "account-properties-dialog-data.h"
 
 namespace Tp {
 class AccountManager;
@@ -64,7 +63,7 @@ public:
 
     Q_PROPERTY(bool online READ online NOTIFY onlineChanged)
 
-    Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged) //TODO
+    Q_PROPERTY(QString avatarPath READ avatarPath NOTIFY avatarPathChanged)
 
     Q_PROPERTY(QVariant parameterList READ parameterList NOTIFY parameterListChanged)
 
