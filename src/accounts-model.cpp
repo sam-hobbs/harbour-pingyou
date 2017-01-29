@@ -417,15 +417,20 @@ void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
             SIGNAL(numValidAccountsChanged())
             );
 
+    connect(newAccount,SIGNAL(onlineChanged(bool)),
+            SIGNAL(numOnlineAccountsChanged())
+            );
+
     myList.append(newAccount);
 
     endInsertRows();
 
     emit numValidAccountsChanged();
+    emit numOnlineAccountsChanged();
 }
 
 
-bool AccountsModel::numValidAccounts() const {
+int AccountsModel::numValidAccounts() const {
 
     int numValid = 0;
 
@@ -440,6 +445,18 @@ bool AccountsModel::numValidAccounts() const {
     return numValid;
 }
 
+int AccountsModel::numOnlineAccounts() const {
+    int numOnline = 0;
+
+    // loop through the list of AccountElement objects and count number of online accounts
+    foreach (AccountElement * account, myList) {
+        if (account->online()) {
+            numOnline++;
+        }
+    }
+    return numOnline;
+}
+
 void AccountsModel::removeAccount(AccountElement * account) {
     qDebug() << "removeAccount called";
 
@@ -452,6 +469,7 @@ void AccountsModel::removeAccount(AccountElement * account) {
             endRemoveRows();
             delete item;
             emit numValidAccountsChanged();
+            emit numOnlineAccountsChanged();
         } else {
             qDebug() << "Item " << i << "does not match the account to be removed";
         }

@@ -28,7 +28,7 @@ CoverBackground {
 
     Image {
         id: coverIcon
-        source: (accountsModel.numValidAccounts > 0) ? "qrc:///tux" : "qrc:///tux-sleeping"
+        source: (accountsModel.numOnlineAccounts > 0) ? "qrc:///tux" : "qrc:///tux-sleeping"
         fillMode: Image.PreserveAspectFit
         cache: true
         //anchors.centerIn: parent

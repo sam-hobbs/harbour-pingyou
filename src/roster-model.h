@@ -116,6 +116,7 @@ class RosterModel : public QAbstractListModel
 {
 
     Q_OBJECT
+    Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
 
 public:
     RosterModel(QObject *parent = 0);
@@ -125,7 +126,8 @@ public:
     Tp::ConnectionPtr connection() const {return mConn; }
     void setConnection(const Tp::ConnectionPtr &conn);
     void unsetConnection();
-    //void onAccountConnectionChanged(const Tp::ConnectionPtr &conn);
+
+    bool connected() const;
 
     // rowCount() and data() are required functions for subclassing QAbstractListModel
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -140,6 +142,8 @@ public:
 
     Q_INVOKABLE void addContact(QString);
 
+signals:
+    void connectedChanged();
 public Q_SLOTS:
     Q_INVOKABLE void setAccount(Tp::AccountPtr);
     void onAccountConnectionChanged(const Tp::ConnectionPtr &conn);

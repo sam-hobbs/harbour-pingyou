@@ -64,7 +64,8 @@ DISTFILES += \
     qml/delegates/RosterEntry.qml \
     qml/dialogs/AddContactDialog.qml \
     qml/dialogs/AccountPropertiesDialog.qml \
-    qml/pages/SettingsPage.qml
+    qml/pages/SettingsPage.qml \
+    qml/pages/AboutPage.qml
 
 RESOURCES += \
     harbour-pingyou.qrc

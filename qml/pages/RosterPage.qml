@@ -36,6 +36,12 @@ Page {
             MenuItem {
                 text: qsTr("Add contact")
                 onClicked: pageStack.push(Qt.resolvedUrl("../dialogs/AddContactDialog.qml"))
+                visible: rosterModel.connected
+            }
+
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
             }
         }
 

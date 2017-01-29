@@ -171,6 +171,7 @@ class AccountsModel : public QAbstractListModel
 
     Q_OBJECT
     Q_PROPERTY( int numValidAccounts READ numValidAccounts NOTIFY numValidAccountsChanged)
+    Q_PROPERTY( int numOnlineAccounts READ numOnlineAccounts NOTIFY numOnlineAccountsChanged)
 
 public:
     AccountsModel(QObject *parent = 0);
@@ -186,7 +187,8 @@ public:
 
     Q_ENUMS(Columns)
 
-    bool numValidAccounts() const;
+    int numValidAccounts() const;
+    int numOnlineAccounts() const;
 
     Q_INVOKABLE void prepareParameterQVariantMap(QVariantMap);
 private:
@@ -196,6 +198,7 @@ private:
 signals:
     void newAccountPtr(Tp::AccountPtr);
     void numValidAccountsChanged();
+    void numOnlineAccountsChanged();
 
 public Q_SLOTS:
     void genericErrorHandler(Tp::PendingOperation *);

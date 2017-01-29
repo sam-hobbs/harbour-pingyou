@@ -40,6 +40,11 @@ Page {
             }
 
             MenuItem {
+                text: qsTr("About")
+                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
+            }
+
+            MenuItem {
                 text: qsTr("Roster")
                 onClicked: pageStack.push(Qt.resolvedUrl("RosterPage.qml"))
                 visible: (accountsModel.numValidAccounts > 0)

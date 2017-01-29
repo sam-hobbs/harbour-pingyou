@@ -346,6 +346,9 @@ void RosterModel::setConnection(const Tp::ConnectionPtr &conn) {
             SIGNAL(stateChanged(Tp::ContactListState)),
             SLOT(onContactManagerStateChanged(Tp::ContactListState)));
 
+    connect(conn.data(), SIGNAL(statusChanged(Tp::ConnectionStatus)),
+            this, SIGNAL(connectedChanged()));
+
     onContactManagerStateChanged(conn->contactManager()->state());
 
 }
@@ -560,4 +563,11 @@ QVariant RosterModel::data(const QModelIndex &index, int role) const {
     }
 
     return QVariant();
+}
+
+bool RosterModel::connected() const {
+    if (mConn) {
+        return true;
+    }
+    return false;
 }
