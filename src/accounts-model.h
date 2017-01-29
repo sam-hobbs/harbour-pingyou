@@ -117,6 +117,8 @@ public:
     Q_INVOKABLE void setAutomaticPresence(int, QString statusString);
     Q_INVOKABLE void setRequestedPresence(int, QString statusString);
 
+    Q_INVOKABLE void setAvatar(QString path);
+
 signals:
     void validChanged(bool);
     void enabledChanged(bool);

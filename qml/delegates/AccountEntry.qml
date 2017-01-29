@@ -72,6 +72,17 @@ BackgroundItem {
                 onClicked: account.reconnect()
                 visible: settings.displayDevInfo
             }
+
+            MenuItem {
+                text: qsTr("Set avatar")
+
+                onClicked: {
+                    //pageStack.push(Qt.resolvedUrl("../dialogs/ImagePicker.qml"))
+                    fileModel.searchPath = "foo"
+                    pageStack.push(imagepicker)
+                    imagepicker.selected.connect(account.setAvatar)
+                }
+            }
         }
 
         contentHeight: expanding.height

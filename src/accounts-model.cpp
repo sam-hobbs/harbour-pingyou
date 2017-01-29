@@ -315,6 +315,28 @@ QVariant AccountElement::connectionErrorDetails() const {
     return QVariant::fromValue(map);
 }
 
+void AccountElement::setAvatar(QString path) {
+    qDebug() << "Path is " << path;
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Can't open file";
+        return;
+    }
+
+    Tp::Avatar avatar;
+    avatar.avatarData = file.readAll();
+    QMimeDatabase db;
+    avatar.MIMEType = db.mimeTypeForData(file.readAll()).name();
+
+    AccountsModel * accountsModel = dynamic_cast<AccountsModel *>(this->parent());
+
+    connect(mAcc->setAvatar(avatar),SIGNAL(finished(Tp::PendingOperation*)),
+            accountsModel,SLOT(genericErrorHandler(Tp::PendingOperation*))
+            );
+
+}
+
 // ==========================================================
 
 

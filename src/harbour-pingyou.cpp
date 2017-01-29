@@ -38,6 +38,7 @@ along with PingYou.  If not, see <http://www.gnu.org/licenses/>
 #include "roster-model.h"
 #include "pingyou-settings.h"
 #include "account-properties-dialog-data.h"
+#include "filemodel.h"
 
 int main(int argc, char *argv[])
 {   
@@ -51,23 +52,25 @@ int main(int argc, char *argv[])
     // Register types with dbus to prevent errors like "type Tp::UIntList is not registered with QtDBus"
     Tp::registerTypes();
 
-    // create AccountsModel item that will be exposed to QML
+    // create c++ items
     AccountsModel *accountsModel = new AccountsModel();
     RosterModel *rosterModel = new RosterModel();
-
-    // register settings object with qml engine and expose it
-    qmlRegisterType<PingYouSettings>("harbour.pingyou", 0, 1, "PingYouSettings");
+    FileModel *fileModel = new FileModel();
     PingYouSettings * settings = new PingYouSettings();
-    view->rootContext()->setContextProperty("settings",settings);
+
+    // register settings object with qml engine
+    qmlRegisterType<PingYouSettings>("harbour.pingyou", 0, 1, "PingYouSettings");
 
     // register the class holding the account properties
     //qmlRegisterType<AccountPropertiesDialogData>("harbour.pingyou",0,1,"AccountPropertiesDialogData");
     //qRegisterMetaType<AccountPropertiesDialogData>("AccountPropertiesDialogData");
     qRegisterMetaType<AccountPropertiesDialogData>();
 
-    // expose the accountsModel data model to qml https://doc.qt.io/qt-4.8/qdeclarativemodels.html
+    // expose the c++ objects to qml https://doc.qt.io/qt-4.8/qdeclarativemodels.html
     view->rootContext()->setContextProperty("accountsModel", accountsModel);
     view->rootContext()->setContextProperty("rosterModel",rosterModel);
+    view->rootContext()->setContextProperty("fileModel",fileModel);
+    view->rootContext()->setContextProperty("settings",settings);
 
     QObject::connect(accountsModel, SIGNAL(newAccountPtr(Tp::AccountPtr)),
             rosterModel, SLOT(setAccount(Tp::AccountPtr)));
