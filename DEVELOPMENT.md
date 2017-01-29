@@ -24,9 +24,19 @@ Some useful resources are below:
 
 ## Use of Telepathy-Qt types within QML
 
-The data in PingYou is presented using models. I have encapsulated the Telepathy-Qt types in my own classes to use as elements in the model (e.g. _AccountsItem_) because some of the Telepathy types such as [Tp::Account](https://github.com/TelepathyIM/telepathy-qt/blob/master/TelepathyQt/account.h) have Q_PROPERTYs that return types that cannot be registered with the QML engine, so they require some processing before the data can be passed to QML.
+The data in PingYou is presented using models.
 
-For example, the presence properties of _Tp::Account_ including _currentPresence_ have type [Tp::Presence](https://github.com/TelepathyIM/telepathy-qt/blob/master/TelepathyQt/presence.h), which is not derived from qobject and does not contain the Q_OBJECT macro.
+I encapsulated the Telepathy-Qt types in my own classes to use as elements in the model (e.g. _AccountsItem_) because some of the Telepathy types such as [Tp::Account](https://github.com/TelepathyIM/telepathy-qt/blob/master/TelepathyQt/account.h) have Q_PROPERTYs that return types that aren't supported by the QML engine.
+
+Since then, I have realised that all of these types are simple classes or structs that could be registered with the QML engine, which makes sense because that's the whole point of TelepathyQt! According to the [docs for qRegisterMetaType](https://doc.qt.io/qt-5/qmetatype.html#qRegisterMetaType) it should be possible to register classes like [Tp::Presence](https://github.com/TelepathyIM/telepathy-qt/blob/master/TelepathyQt/presence.h) as types because they have:
+
+* A public default constructor
+* A public destructor
+* A public copy constructor
+
+Therefore, it will be necessary in the near future to re-write the account and roster models to remove the abstraction. The more complicated classes like _Tp::Account_ still can't be initialised from within QML because they derive from Q_OBJECT, which doesn't have a copy constructor and explicitly disables copying, but these models can be created from C++ and exposed to QML as they are now.
+
+Further notes below:
 
 It is possible to register the _Tp::Account_ type like this:
 
@@ -49,8 +59,6 @@ Similarly, the _Tp::Account_ type cannot be registered as a metatype like this:
     qRegisterMetaType<Tp::Account>("Tp::Account");
 
 ...because the class contains the Q_DISABLE_COPY macro (you will get an error like _"'Tp::Account::Account(const Tp::Account&)' is private"_. Presumably this is because you are supposed to access the account using a shared pointer returned using the static Account::create functions.
-
-The [docs for qRegisterMetaType](https://doc.qt.io/qt-5/qmetatype.html#qRegisterMetaType) say _"any class or struct that has a public default constructor, a public copy constructor and a public destructor can be registered"_, so it probably wouldn't work even if Tp::Account didn't contain the Q_DISABLE_COPY macro.
 
 I found the following references useful when experimenting with TelepathyQt types and qml:
 
