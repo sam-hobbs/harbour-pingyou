@@ -268,11 +268,11 @@ QString RosterElement::avatarPath() const {
     if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarData)) {
 
         if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarToken)) {
-            if ( mContact->isAvatarTokenKnown() ) {
-                qDebug() << mContact->id() << ": avatar and avatar token features are supported, token is " << mContact->avatarToken() << ", path is " << mContact->avatarData().fileName;
-            } else {
-                qDebug() << mContact->id() << ": avatar and avatar token features are supported, path is " << mContact->avatarData().fileName;
-            }
+//            if ( mContact->isAvatarTokenKnown() ) {
+//                qDebug() << mContact->id() << ": avatar and avatar token features are supported, token is " << mContact->avatarToken() << ", path is " << mContact->avatarData().fileName;
+//            } else {
+//                qDebug() << mContact->id() << ": avatar and avatar token features are supported, path is " << mContact->avatarData().fileName;
+//            }
         } else {
             qDebug() << mContact->id() << ": avatar feature is supported, path is " << mContact->avatarData().fileName;
         }
@@ -287,13 +287,13 @@ void RosterElement::onAvatarTokenChanged(QString avatarToken) {
 
     Q_ASSERT(!mContact.isNull());
 
-    qDebug() << mContact->id() << ": onAvatarTokenChanged called";
+    //qDebug() << mContact->id() << ": onAvatarTokenChanged called";
     if (mAvatarToken != avatarToken) {
-        qDebug() << "avatar token changed, emitting avatarPathChanged";
+        //qDebug() << "avatar token changed, emitting avatarPathChanged";
         mAvatarToken = avatarToken;
         emit avatarPathChanged(avatarPath());
     } else {
-        qDebug() << "avatar token has not changed, doing nothing";
+        //qDebug() << "avatar token has not changed, doing nothing";
     }
 }
 
@@ -301,9 +301,9 @@ void RosterElement::onAvatarDataChanged(Tp::AvatarData data) {
 
     Q_ASSERT(!mContact.isNull());
 
-    qDebug() << mContact->id() << ": onAvatarDataChanged called";
+    //qDebug() << mContact->id() << ": onAvatarDataChanged called";
     if (mContact->actualFeatures().contains(Tp::Contact::FeatureAvatarToken)) {
-        qDebug() << "not changing avatar path because tokens are supported";
+        //qDebug() << "not changing avatar path because tokens are supported";
     } else {
         emit avatarPathChanged(data.fileName);
     }
@@ -321,7 +321,7 @@ RosterModel::~RosterModel() {
 
 void RosterModel::setConnection(const Tp::ConnectionPtr &conn) {
 
-    qDebug() << "setConnection called";
+    //qDebug() << "setConnection called";
 
     //Q_ASSERT(!mConn.isNull());
 

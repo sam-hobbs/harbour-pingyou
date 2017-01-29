@@ -188,7 +188,10 @@ public:
 
     bool numValidAccounts() const;
 
-    Q_INVOKABLE void createAccount(QVariantMap);
+    Q_INVOKABLE void prepareParameterQVariantMap(QVariantMap);
+private:
+    void createAccount(QVariantMap);
+    void changeAccountParameters(Tp::AccountPtr,QVariantMap);
 
 signals:
     void newAccountPtr(Tp::AccountPtr);

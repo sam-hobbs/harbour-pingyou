@@ -78,10 +78,10 @@ BackgroundItem {
 
         ExpandingSection {
             id: expanding
-            //title: (account.valid && account.enabled) ? account.nickname + " (enabled)" : account.nickname + " (disabled)"
-            title: (account.nickname !== "") ? account.nickname : account.displayName
+
+            title: (account.nickname !== "") ? account.nickname : account.displayName // TODO: find out a way to reduce font size of title
+
             expanded: (account.valid && account.enabled)
-            //height: column.height
             content.sourceComponent:
 
             Column {
@@ -90,7 +90,6 @@ BackgroundItem {
                 width: parent.width
                 anchors.leftMargin: Theme.paddingLarge
                 anchors.rightMargin: Theme.paddingLarge
-                //height: avatarImage.height + nicknameDetail.height + currentPresenceDetail.height + devInfo.height
 
                 Image {                    
                     id: avatarImage
@@ -104,7 +103,6 @@ BackgroundItem {
 
                 Item {
                     width: 1
-                    //height: Theme.paddingMedium
                     height: Theme.paddingLarge
                     visible: (avatarImage.height > 0) ? true : false
                 }

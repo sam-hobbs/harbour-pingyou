@@ -144,7 +144,7 @@ QString AccountElement::automaticPresence() const {
 }
 
 QString AccountElement::currentPresence() const {
-    qDebug() << mAcc->currentPresence().status();
+    //qDebug() << mAcc->currentPresence().status();
     return mAcc->currentPresence().status();
 }
 
@@ -373,7 +373,7 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
 
     Q_UNUSED(op);
 
-    qDebug() << "onAMReady called";
+    //qDebug() << "onAMReady called";
 
     // query for jabber accounts only. mAM->allAccounts() returns telephony accounts too, which we don't want
     foreach(const Tp::AccountPtr &acc, mAM->accountsByProtocol(QString("jabber"))->accounts() ) {
@@ -394,7 +394,7 @@ void AccountsModel::onAMReady(Tp::PendingOperation *op) {
 }
 
 void AccountsModel::addAccountElement(const Tp::AccountPtr &acc) {
-    qDebug() << "addAccountElement called, adding account with display name " << acc->displayName();
+    //qDebug() << "addAccountElement called, adding account with display name " << acc->displayName();
 
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
@@ -501,23 +501,22 @@ void AccountsModel::removeAccount(AccountElement * account) {
  * \sa supportedAccountProperties()
  */
 
-void AccountsModel::createAccount(QVariantMap parameters) {
-    qDebug() << "Printing account properties from createAccount";
-    qDebug() << parameters;
+
+void AccountsModel::prepareParameterQVariantMap(QVariantMap parameters) {
 
     // iterate through the qvariantmap and remove empty strings
     QVariantMap::iterator iter = parameters.begin();
     while( iter !=parameters.end() ) {
-        qDebug() << "Current item is " << iter.key() << iter.value();
+        //qDebug() << "Current item is " << iter.key() << iter.value();
         if (iter.value() == QVariant(QString(""))) {
-            qDebug() << "removing empty string";
+            //qDebug() << "removing empty string";
             iter = parameters.erase(iter);
         } else {
             ++iter;
         }
     }
 
-    qDebug() << "Changing types";
+    // change types
     if (parameters.contains("keepalive-interval")) parameters["keepalive-interval"]= QVariant(parameters.value("keepalive-interval").toUInt());
     if (parameters.contains("https-proxy-port")) parameters["https-proxy-port"]= QVariant(parameters.value("https-proxy-port").toUInt());
     if (parameters.contains("priority")) parameters["priority"]= QVariant(parameters.value("priority").toInt());
@@ -528,8 +527,33 @@ void AccountsModel::createAccount(QVariantMap parameters) {
     if (parameters.contains("port")) parameters["port"]= QVariant(parameters.value("port").toUInt());
     if (parameters.contains("stun-port")) parameters["stun-port"]= QVariant(parameters.value("stun-port").toUInt());
 
-    qDebug() << "Printing account properties after fixing types";
-    qDebug() << parameters;
+    // TODO: change dialog so account is required before dialog is accepted
+    Q_ASSERT(parameters.contains("account") && !parameters.value("account").toString().isEmpty());
+
+    QString accountName = parameters.value("account").toString();
+    bool exists = false;
+
+    // if the parameters are for an account that already exists, amend the parameters
+    foreach (AccountElement * account, myList) {
+        //qDebug() << "Checking account " << account->displayName();
+        if (account->displayName() == accountName) {
+            qDebug() << "Account " << account->displayName() << " already exists, changing account parameters";
+            exists = true;
+            changeAccountParameters(account->getAccountPtr(),parameters);
+            break;
+        }
+    }
+
+    // if the account does not exist, create a new account
+    if (!exists) {
+        qDebug() << "Account " << parameters.value("account").toString() << " does not exist, creating new account";
+        createAccount(parameters);
+    }
+}
+
+
+
+void AccountsModel::createAccount(QVariantMap parameters) {
 
     // create a qvariantmap of properties to use in account creation
     QVariantMap properties;
@@ -546,6 +570,55 @@ void AccountsModel::createAccount(QVariantMap parameters) {
     connect(pendingAccount, SIGNAL(finished(Tp::PendingOperation*)),
             this, SLOT(onAccountCreationFinished(Tp::PendingOperation*))
             );
+}
+
+
+void AccountsModel::changeAccountParameters(Tp::AccountPtr account,QVariantMap newParams) {
+
+//    qDebug() << "changeAccountParameters called";
+    QVariantMap currentParams = account->parameters();
+
+//    qDebug() << "printing current parameters";
+//    qDebug() << currentParams;
+//    qDebug() << "printing new parameters";
+//    qDebug() << newParams;
+
+    QVariantMap setParams; // parameters to be set
+    QStringList unsetParams; // parameters to be unset
+
+    // loop through the current parameters to find ones that have been removed
+    QVariantMap::iterator iter = currentParams.begin();
+    while( iter !=currentParams.end() ) {
+        // if parameter is in currentParams but not in newParams, it has been unset
+        if (!newParams.contains(iter.key())) {
+            //qDebug() << iter.key() << " will be unset";
+            unsetParams.append(iter.key());
+        }
+        ++iter;
+    }
+
+    // loop through the new parameters to find ones that have changed
+    iter = newParams.begin();
+    while( iter !=newParams.end() ) {
+        // if parameter is not in currentParams, it is new
+        if (!currentParams.contains(iter.key())) {
+            //qDebug() << iter.key() << " is new and will be set";
+            setParams.insert(iter.key(),iter.value());
+        } else {
+            // if parameter is in currentParams and newParams and the values are equal, value has not changed (do nothing)
+            // if parameter is in currentParams and newParams and the values are different, update the parameter
+            if(iter.value() == currentParams.value(iter.key())) {
+                //qDebug() << iter.key() << " value has not changed";
+            } else {
+                //qDebug() << iter.key() << " value has changed and will be updated";
+                setParams.insert(iter.key(),iter.value());
+            }
+        }
+        ++iter;
+    }
+
+    // TODO: connect pendingstringlist to error handling slot
+    account->updateParameters(setParams, unsetParams);
 
 }
 

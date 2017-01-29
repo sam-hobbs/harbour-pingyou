@@ -34,11 +34,7 @@ Dialog {
     property variant parameterModel // set when dialog is opened
     property bool existingAccount // set when dialog is opened
 
-//    AccountPropertiesDialogData {
-//        id: parameterModel
-//    }
-
-//    property AccountPropertiesDialogData parameterModel;
+    canAccept: (accountItem.acceptableInput) ? true : false
 
     SilicaFlickable {
         anchors.fill: parent
@@ -60,7 +56,6 @@ Dialog {
 
             TextField {
                 id: accountItem
-                //text: parameterModel.account
                 text: parameterModel["account"] ? parameterModel["account"] : ""
                 inputMethodHints: Qt.ImhEmailCharactersOnly
                 placeholderText: "Jabber ID (romeo@montague.net)"
@@ -71,11 +66,11 @@ Dialog {
                 width: parent.width
 
                 focus: true
+                validator: RegExpValidator { regExp: /^\w+@\w+(\.\w+)+$/ }
             }
 
             TextField {
                 id: passwordItem
-                //text: parameterModel.password
                 text: parameterModel["password"] ? parameterModel["password"] : ""
                 inputMethodHints: Qt.ImhHiddenText
                 placeholderText: "Password"
@@ -92,7 +87,6 @@ Dialog {
                 visible: existingAccount ? false : true
                 text: "Register"
                 description: "Register this account with the server"
-                //checked: parameterModel.register
                 checked: parameterModel["register"] ? parameterModel["register"] : false
             }
 
@@ -100,7 +94,6 @@ Dialog {
 
             TextField {
                 id: serverItem
-                //text: parameterModel.server
                 text: parameterModel["server"] ? parameterModel["server"] : ""
                 inputMethodHints: Qt.ImhNoAutoUppercase
                 placeholderText: "Server address"
@@ -113,7 +106,6 @@ Dialog {
 
             TextField {
                 id: portItem
-                //text: parameterModel.port
                 text: parameterModel["port"] ? parameterModel["port"] : ""
                 inputMethodHints: Qt.ImhDigitsOnly
                 placeholderText: "5222"
@@ -128,15 +120,12 @@ Dialog {
                 id: oldSSLItem
                 text: "Old SSL"
                 description: "Connect using SSL instead of STARTTLS"
-                //checked: parameterModel.oldSSL
                 checked: parameterModel["old-ssl"] ? parameterModel["old-ssl"] : false
                 width: parent.width
             }
 
             TextField {
                 id: fallbackServersItem
-                //text: "" // invalid
-                //text: parameterModel.fallbackServers
                 text: parameterModel["fallback-servers"] ? parameterModel["fallback-servers"] : ""
                 inputMethodHints: Qt.ImhUrlCharactersOnly
                 placeholderText: "Fallback servers"
@@ -149,8 +138,6 @@ Dialog {
 
             TextField {
                 id: fallbackConferenceServerItem
-                //text: ""
-                //text: parameterModel.fallbackConferenceServer
                 text: parameterModel["fallback-conference-server"] ? parameterModel["fallback-conference-server"] : ""
                 placeholderText: "Fallback conference server"
                 inputMethodHints: Qt.ImhUrlCharactersOnly
@@ -163,8 +150,6 @@ Dialog {
 
             TextField {
                 id: fallbackSocks5ProxiesItem
-                //text: "" // qstringlist (empty)
-                //text: parameterModel.fallbackSocks5Proxies
                 text: parameterModel["fallback-socks5-proxies"] ? parameterModel["fallback-socks5-proxies"] : ""
                 placeholderText: "Fallback SOCKS5 proxies"
 
@@ -181,8 +166,6 @@ Dialog {
                 text: "Require encryption"
                 icon.source: checked ? "image://theme/icon-m-device-lock" : "image://theme/icon-m-dismiss"
                 description: "Mandatory tranport encryption"
-                //checked: true
-                //checked: parameterModel.requireEncryption
                 checked: parameterModel["require-encryption"] ? parameterModel["require-encryption"] : true
                 width: parent.width
             }
@@ -200,8 +183,6 @@ Dialog {
 
             TextField {
                 id: extraCertificateIdentitiesItem
-                //text: "" // invalid
-                //text: parameterModel.extraCertificateIdentities
                 text: parameterModel["extra-certificate-identities"] ? parameterModel["extra-certificate-identities"] : ""
                 placeholderText: "Extra certificate identities"
 
@@ -216,7 +197,6 @@ Dialog {
 
             TextField {
                 id: resourceNameItem
-                //text: parameterModel.resource
                 text: parameterModel["resource"] ? parameterModel["resource"] : "PingYou"
                 placeholderText: "PingYou"
                 inputMethodHints: Qt.ImhNoAutoUppercase
@@ -229,8 +209,6 @@ Dialog {
 
             TextField {
                 id: aliasItem
-                //text: ""
-                //text: parameterModel.alias
                 text: parameterModel["alias"] ? parameterModel["alias"] : ""
                 placeholderText: "Alias"
                 inputMethodHints: Qt.ImhNoPredictiveText
@@ -246,8 +224,6 @@ Dialog {
                 width: parent.width
                 minimumValue: -256
                 maximumValue: 256
-                //value: 0
-                //value: parameterModel.priority
                 value: parameterModel["priority"] ? parameterModel["priority"] : 0
                 valueText: value
                 label: "Priority"
@@ -258,8 +234,6 @@ Dialog {
 
             TextField {
                 id: keepaliveIntervalItem
-                //text: ""
-                //text: parameterModel.keepaliveInterval
                 text: parameterModel["keepalive-interval"] ? parameterModel["keepalive-interval"] : ""
                 placeholderText: "Keepalive Interval"
                 inputMethodHints: Qt.ImhDigitsOnly
@@ -273,9 +247,6 @@ Dialog {
             TextSwitch {
                 id: lowBandwidthItem
                 text: "Low bandwidth"
-                //description: "Not sure what this does"
-                //checked: false
-                //checked: parameterModel.lowBandwidth
                 checked: parameterModel["low-bandwidth"] ? parameterModel["low-bandwidth"] : false
             }
 
@@ -284,8 +255,6 @@ Dialog {
 
             TextField {
                 id: httpsProxyServerItem
-                //text: ""
-                //text: parameterModel.httpsProxyServer
                 text: parameterModel["https-proxy-server"] ? parameterModel["https-proxy-server"] : ""
                 placeholderText: "HTTPS proxy server"
                 inputMethodHints: Qt.ImhUrlCharactersOnly
@@ -298,8 +267,6 @@ Dialog {
 
             TextField {
                 id: httpsProxyPortItem
-                //text: "443"
-                //text: parameterModel.httpsProxyPort
                 text: parameterModel["https-proxy-port"] ? parameterModel["https-proxy-port"] : ""
                 placeholderText: "HTTPS proxy port"
                 inputMethodHints: Qt.ImhDigitsOnly
@@ -314,8 +281,6 @@ Dialog {
 
             TextField {
                 id: stunServerItem
-                //text: ""
-                //text: parameterModel.stunServer
                 text: parameterModel["stun-server"] ? parameterModel["stun-server"] : ""
                 placeholderText: "STUN server"
                 inputMethodHints: Qt.ImhUrlCharactersOnly
@@ -328,8 +293,6 @@ Dialog {
 
             TextField {
                 id: stunPortItem
-                //text: ""
-                //text: parameterModel.stunPort
                 text: parameterModel["stun-port"] ? parameterModel["stun-port"] : ""
                 placeholderText: "STUN port"
                 inputMethodHints: Qt.ImhDigitsOnly
@@ -342,8 +305,6 @@ Dialog {
 
             TextField {
                 id: fallbackStunServerItem
-                //text: ""
-                //text: parameterModel.fallbackStunServer
                 text: parameterModel["fallback-stun-server"] ? parameterModel["fallback-stun-server"] : ""
                 placeholderText: "Fallback STUN server"
                 inputMethodHints: Qt.ImhUrlCharactersOnly
@@ -356,8 +317,6 @@ Dialog {
 
             TextField {
                 id: fallbackStunPortItem
-                // text: ""
-                //text: parameterModel.fallbackStunPort
                 text: parameterModel["fallback-stun-port"] ? parameterModel["fallback-stun-port"] : ""
                 placeholderText: "Fallback STUN port"
                 inputMethodHints: Qt.ImhDigitsOnly
@@ -374,9 +333,6 @@ Dialog {
                 id: decloakAutomaticallyItem
                 // org.freedesktop.Telepathy.Connection.Interface.Gabble.Decloak.DecloakAutomatically
                 text: "Decloak automatically"
-                //description: "Decloak automatically"
-                //checked: true
-                //checked: parameterModel.decloakAutomatically
                 checked: parameterModel["decloak-automatically"] ? parameterModel["decloak-automatically"] : ""
                 width: parent.width
             }
@@ -386,8 +342,6 @@ Dialog {
                 // org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection
                 text: "Download contact list at connection"
                 description: "Retrieves the roster during connection"
-                //checked: true
-                //checked: parameterModel.downloadAtConnection
                 checked: parameterModel["download-at-connection"] ? parameterModel["download-at-connection"] : ""
             }
 
@@ -415,16 +369,12 @@ Dialog {
             // if this is an existing account, call method to update properties. Otherwise, create a new account
             if (existingAccount) {
                 console.log("Updating account parameters")
-
                 // https://supportforums.blackberry.com/t5/Native-Development/Passing-QVariantMap-from-QML/td-p/2473237
-                //accountsModel.createAccount({"ignore-ssl-errors": ignoreSSLItem.checked,"fallback-stun-port": fallbackStunPortItem.text})
-                accountsModel.createAccount({"account": accountItem.text, "password": passwordItem.text, "server": serverItem.text, "port": portItem.text, "old-ssl": oldSSLItem.checked, "fallback-servers": fallbackServersItem.text, "fallback-conference-server": fallbackConferenceServerItem.text, "fallback-socks5-proxies": fallbackSocks5ProxiesItem.text, "require-encryption": requireEncryptionItem.checked, "ignore-ssl-errors": ignoreSSLItem.checked, "extra-certificate-identities": extraCertificateIdentitiesItem.text, "resource": resourceNameItem.text, "alias": aliasItem.text, "priority": priorityItem.value, "keepalive-interval": keepaliveIntervalItem.text, "low-bandwidth": lowBandwidthItem.checked, "https-proxy-server": httpsProxyServerItem.text, "https-proxy-port": httpsProxyPortItem.text, "stun-server": stunServerItem.text, "stun-port": stunPortItem.text, "fallback-stun-server": fallbackStunServerItem.text, "fallback-stun-port": fallbackStunPortItem.text, "org.freedesktop.Telepathy.Connection.Interface.Gabble.Decloak.DecloakAutomatically": decloakAutomaticallyItem.checked, "org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection": downloadAtConnectionItem.checked})
+                accountsModel.prepareParameterQVariantMap({"account": accountItem.text, "password": passwordItem.text, "server": serverItem.text, "port": portItem.text, "old-ssl": oldSSLItem.checked, "fallback-servers": fallbackServersItem.text, "fallback-conference-server": fallbackConferenceServerItem.text, "fallback-socks5-proxies": fallbackSocks5ProxiesItem.text, "require-encryption": requireEncryptionItem.checked, "ignore-ssl-errors": ignoreSSLItem.checked, "extra-certificate-identities": extraCertificateIdentitiesItem.text, "resource": resourceNameItem.text, "alias": aliasItem.text, "priority": priorityItem.value, "keepalive-interval": keepaliveIntervalItem.text, "low-bandwidth": lowBandwidthItem.checked, "https-proxy-server": httpsProxyServerItem.text, "https-proxy-port": httpsProxyPortItem.text, "stun-server": stunServerItem.text, "stun-port": stunPortItem.text, "fallback-stun-server": fallbackStunServerItem.text, "fallback-stun-port": fallbackStunPortItem.text, "org.freedesktop.Telepathy.Connection.Interface.Gabble.Decloak.DecloakAutomatically": decloakAutomaticallyItem.checked, "org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection": downloadAtConnectionItem.checked})
 
             } else {
                 console.log("Creating new account using supplied parameters")
-                //accountsModel.createAccount(parameterModel)
-                //accountsModel.createAccount({"ignore-ssl-errors": ignoreSSLItem.checked,"fallback-stun-port": fallbackStunPortItem.text})
-                accountsModel.createAccount({"account": accountItem.text, "password": passwordItem.text, "register": registerItem.checked, "server": serverItem.text, "port": portItem.text, "old-ssl": oldSSLItem.checked, "fallback-servers": fallbackServersItem.text, "fallback-conference-server": fallbackConferenceServerItem.text, "fallback-socks5-proxies": fallbackSocks5ProxiesItem.text, "require-encryption": requireEncryptionItem.checked, "ignore-ssl-errors": ignoreSSLItem.checked, "extra-certificate-identities": extraCertificateIdentitiesItem.text, "resource": resourceNameItem.text, "alias": aliasItem.text, "priority": priorityItem.value, "keepalive-interval": keepaliveIntervalItem.text, "low-bandwidth": lowBandwidthItem.checked, "https-proxy-server": httpsProxyServerItem.text, "https-proxy-port": httpsProxyPortItem.text, "stun-server": stunServerItem.text, "stun-port": stunPortItem.text, "fallback-stun-server": fallbackStunServerItem.text, "fallback-stun-port": fallbackStunPortItem.text, "org.freedesktop.Telepathy.Connection.Interface.Gabble.Decloak.DecloakAutomatically": decloakAutomaticallyItem.checked, "org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection": downloadAtConnectionItem.checked})
+                accountsModel.prepareParameterQVariantMap({"account": accountItem.text, "password": passwordItem.text, "register": registerItem.checked, "server": serverItem.text, "port": portItem.text, "old-ssl": oldSSLItem.checked, "fallback-servers": fallbackServersItem.text, "fallback-conference-server": fallbackConferenceServerItem.text, "fallback-socks5-proxies": fallbackSocks5ProxiesItem.text, "require-encryption": requireEncryptionItem.checked, "ignore-ssl-errors": ignoreSSLItem.checked, "extra-certificate-identities": extraCertificateIdentitiesItem.text, "resource": resourceNameItem.text, "alias": aliasItem.text, "priority": priorityItem.value, "keepalive-interval": keepaliveIntervalItem.text, "low-bandwidth": lowBandwidthItem.checked, "https-proxy-server": httpsProxyServerItem.text, "https-proxy-port": httpsProxyPortItem.text, "stun-server": stunServerItem.text, "stun-port": stunPortItem.text, "fallback-stun-server": fallbackStunServerItem.text, "fallback-stun-port": fallbackStunPortItem.text, "org.freedesktop.Telepathy.Connection.Interface.Gabble.Decloak.DecloakAutomatically": decloakAutomaticallyItem.checked, "org.freedesktop.Telepathy.Connection.Interface.ContactList.DownloadAtConnection": downloadAtConnectionItem.checked})
             }
         }
     }
